@@ -1,6 +1,6 @@
 name: clean_gen_tool
-description: A starting point for Dart libraries or applications.
-version: 1.0.0
+description:  A CLI tool for generating clean architecture code structure in Dart/Flutter projects by Mohammad AD
+version: 1.0.1
 repository: https://github.com/Mohammad-AD/clean_gen_tool
 
 environment:

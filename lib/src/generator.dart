@@ -124,11 +124,48 @@ Future<void> _generateLocalizationFiles(Directory projectDir) async {
 Future<void> _generateReadme(Directory projectDir, String projectName) async {
   final readmeFile = File(join(projectDir.path, 'README.md'));
   await readmeFile.writeAsString('''
-Clean Flutter Architecture
-By Mohammad AD
+Clean Flutter Architecture,
+Clean Gen-Tool By Mohammad AD
+
 Contact: richardchalger@gmail.com
 
-# Clean Architecture
+
+# How To Use
+
+First add the package to your pubspec.yaml:
+```yaml
+dependencies:
+  clean_gen_tool: ^1.0.1
+```
+Or run the following command in your terminal:
+With Dart:
+```bash
+  dart pub add clean_gen_tool
+```
+With Flutter:
+```bash
+  flutter pub add clean_gen_tool
+```
+Import it
+```bash
+  import 'package:clean_gen_tool/clean_gen_tool.dart';
+```
+Create a new file named `gen_tool.dart` in the `lib` directory of your Flutter project.
+and add the following code to it:
+```dart
+import 'package:clean_gen_tool/clean_gen_tool.dart';
+
+ void main() async {
+   await CleanGenTool.generate();
+ }
+```
+Then run the generator tool to generate the necessary files and structure:
+```bash
+  dart run lib/gen_tool.dart
+```
+---
+# Documentation:
+## Clean Architecture
 
 This project is a base Flutter Clean Architecture template demonstrating best practices in project
 structure,
@@ -255,10 +292,11 @@ dart lib/generate_structure.dart > structure.txt
 
 ---
 
-# Credits
+## Credits
 
 Built with ❤️
 Special thanks to Abdullah Essam for the inspiration and guidance.
+
 ''');
 }
 
@@ -376,6 +414,7 @@ Future<void> _generateFeatures(Directory libDir, String projectName) async {
 
 Future<void> _generateMainApp(Directory libDir, String projectName) async {
   await File(join(libDir.path, 'main.dart')).writeAsString(_mainCode());
+  await File(join(libDir.path, 'gen_tool.dart')).writeAsString(_genCode());
   await File(join(libDir.path, 'app.dart')).writeAsString(_appCode());
   await File(
     join(libDir.path, 'app_bloc_observer.dart'),
@@ -1768,6 +1807,14 @@ class AppColor {
  static const Color black = Colors.black;
 }
 ''';
+
+String _genCode() => '''
+// import 'package:clean_gen_tool/clean_gen_tool.dart';
+//
+// void main() async {
+//   await CleanGenTool.generate();
+// }
+ ''';
 
 String _mainCode() => '''
 import 'package:dio/dio.dart';
