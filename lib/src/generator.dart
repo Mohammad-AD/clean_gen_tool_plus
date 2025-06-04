@@ -304,70 +304,72 @@ Future<void> _generateCore(Directory libDir, String projectName) async {
   final coreDir = Directory(join(libDir.path, 'core'));
   final structure = {
     'general_layer/constants': {
-      'app_constants.dart': _appConstantsCode(), // done
-      'endpoint_constants.dart': _endpointConstantsCode(), // done
-      'strings_constants.dart': _stringsConstantsCode(), // done
+      'app_constants.dart': _appConstantsCode(projectName), // done
+      'endpoint_constants.dart': _endpointConstantsCode(projectName), // done
+      'strings_constants.dart': _stringsConstantsCode(projectName), // done
     },
     'data_layer/network': {
-      'api_consumer.dart': _apiConsumerCode(), // done
-      'dio_consumer.dart': _dioConsumerCode(), // done
-      'interceptors.dart': _interceptorsCode(), // done
-      'status_code.dart': _statusCodeCode(), // done
+      'api_consumer.dart': _apiConsumerCode(projectName), // done
+      'dio_consumer.dart': _dioConsumerCode(projectName), // done
+      'interceptors.dart': _interceptorsCode(projectName), // done
+      'status_code.dart': _statusCodeCode(projectName), // done
     },
     'data_layer/errors': {
-      'exceptions.dart': _exceptionsCode(), // done
-      'failures.dart': _failuresCode(), // done
+      'exceptions.dart': _exceptionsCode(projectName), // done
+      'failures.dart': _failuresCode(projectName), // done
     },
     'general_layer/utils': {
-      'app_validation_utils.dart': _appUtilsCode(), // done
-      'app_shared_preferences.dart': _appPrefsCode(), // done
-      'app_offline_builder.dart': _appOfflineBuilderCode(), // done
-      'app_env_settings.dart': _appEnvSettingsCode(), // done
+      'app_validation_utils.dart': _appUtilsCode(projectName), // done
+      'app_shared_preferences.dart': _appPrefsCode(projectName), // done
+      'app_offline_builder.dart': _appOfflineBuilderCode(projectName), // done
+      'app_env_settings.dart': _appEnvSettingsCode(projectName), // done
     },
     'general_layer/services': {
-      'locale_service.dart': _localeServiceCode(), // done
-      'theme_service.dart': _themeServiceCode(), // done
+      'locale_service.dart': _localeServiceCode(projectName), // done
+      'theme_service.dart': _themeServiceCode(projectName), // done
     },
     'general_layer/routing': {
       'app_router.dart': _appRouterCode(projectName), //done
-      'routes.dart': _routesCode(), //done
+      'routes.dart': _routesCode(projectName), //done
     },
     'general_layer/theme': {
-      'app_theme.dart': _appThemeCode(), //done
-      'app_colors.dart': _appColorsCode(), //done
+      'app_theme.dart': _appThemeCode(projectName), //done
+      'app_colors.dart': _appColorsCode(projectName), //done
     },
     'business_layer/bloc/login': {
-      'login_bloc.dart': _loginBlocCode(), //done
-      'login_event.dart': _loginEventCode(), //done
-      'login_state.dart': _loginStateCode(), //done
+      'login_bloc.dart': _loginBlocCode(projectName), //done
+      'login_event.dart': _loginEventCode(projectName), //done
+      'login_state.dart': _loginStateCode(projectName), //done
     },
     'business_layer/cubit/category': {
-      'category_cubit.dart': _categoryCubitCode(), //done
-      'category_state.dart': _categoryStateCode(), //done
+      'category_cubit.dart': _categoryCubitCode(projectName), //done
+      'category_state.dart': _categoryStateCode(projectName), //done
     },
     'business_layer/cubit/locale': {
-      'locale_cubit.dart': _localeCubitCode(), //done
-      'locale_state.dart': _localeStateCode(), //done
+      'locale_cubit.dart': _localeCubitCode(projectName), //done
+      'locale_state.dart': _localeStateCode(projectName), //done
     },
     'business_layer/cubit/login': {
-      'login_cubit.dart': _loginCubitCode(), //done
-      'login_state.dart': _loginStateCode(), //done
+      'login_cubit.dart': _loginCubitCode(projectName), //done
+      'login_state.dart': _loginStateCode(projectName), //done
     },
     'business_layer/cubit/theme': {
-      'theme_cubit.dart': _themeCubitCode(), //done
-      'theme_state.dart': _themeStateCode(), //done
+      'theme_cubit.dart': _themeCubitCode(projectName), //done
+      'theme_state.dart': _themeStateCode(projectName), //done
     },
-    'data_layer/models': {}, //done
+    'data_layer/models/category': {
+      'category_model.dart': _categoryModelCode(projectName), //done
+    }, //done
     'data_layer/repository/base': {
-      'base_repository.dart': _baseRepositoryCode(), //done
+      'base_repository.dart': _baseRepositoryCode(projectName), //done
     },
     'data_layer/repository/category': {
-      'category_repository.dart': _categoryRepositoryCode(), //done
+      'category_repository.dart': _categoryRepositoryCode(projectName), //done
     },
     'general_layer/extensions': {
-      'navigation_extensions.dart': _navigationExtCode(), //done
-      'sizedbox_extensions.dart': _sizedBoxExtCode(), //done
-      'theme_extensions.dart': _themeExtCode(), //done
+      'navigation_extensions.dart': _navigationExtCode(projectName), //done
+      'sizedbox_extensions.dart': _sizedBoxExtCode(projectName), //done
+      'theme_extensions.dart': _themeExtCode(projectName), //done
     },
   };
 
@@ -413,12 +415,15 @@ Future<void> _generateFeatures(Directory libDir, String projectName) async {
 }
 
 Future<void> _generateMainApp(Directory libDir, String projectName) async {
-  await File(join(libDir.path, 'main.dart')).writeAsString(_mainCode());
-  await File(join(libDir.path, 'gen_tool.dart')).writeAsString(_genCode());
-  await File(join(libDir.path, 'app.dart')).writeAsString(_appCode());
+  await File(join(libDir.path, 'main.dart'))
+      .writeAsString(_mainCode(projectName));
+  await File(join(libDir.path, 'gen_tool.dart'))
+      .writeAsString(_genCode(projectName));
+  await File(join(libDir.path, 'app.dart'))
+      .writeAsString(_appCode(projectName));
   await File(
     join(libDir.path, 'app_bloc_observer.dart'),
-  ).writeAsString(_blocObserverCode());
+  ).writeAsString(_blocObserverCode(projectName));
 }
 
 Future<void> _generatePubspecYaml(
@@ -433,19 +438,17 @@ Future<void> _generatePubspecYaml(
     flutterVersionOutput = flutterVersionResult.stdout.toString();
   } catch (e) {
     stderr.writeln(
-      '❌ فشل في تشغيل flutter --version. تأكد أن Flutter موجود في PATH.',
+      'Please ensure that Flutter is installed and available in your PATH.',
     );
     rethrow;
   }
 
-  // استخراج إصدار Dart باستخدام RegExp
   final sdkMatch = RegExp(
     r'Dart\sSDK\sversion:\s(\d+\.\d+\.\d+)',
   ).firstMatch(flutterVersionOutput);
   final dartVersion = sdkMatch != null ? sdkMatch.group(1)! : '3.0.0';
   final dartVersionClean = dartVersion.replaceAll('^', '');
 
-  // استخراج إصدار Flutter
   final flutterMatch = RegExp(
     r'Flutter\s(\d+\.\d+\.\d+)',
   ).firstMatch(flutterVersionOutput);
@@ -514,12 +517,13 @@ flutter:
   final file = File(join(projectDir.path, 'pubspec.yaml'));
   await file.writeAsString(pubspecContent);
 
-  print('📄 تم إنشاء ملف pubspec.yaml بنجاح!');
+  print(
+      'Pubspec.yaml generated successfully with Flutter version $flutterVersion');
 }
 
 // ============================ الأكواد ============================
 
-String _appConstantsCode() => '''
+String _appConstantsCode(String projectName) => '''
 import 'package:flutter/material.dart';
 
 class AC {
@@ -562,7 +566,7 @@ class AC {
 }
 ''';
 
-String _endpointConstantsCode() => '''
+String _endpointConstantsCode(String projectName) => '''
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class EC {
@@ -572,7 +576,7 @@ class EC {
 
 ''';
 
-String _stringsConstantsCode() => '''
+String _stringsConstantsCode(String projectName) => '''
 class StringsConstants {
   static const Map<String, String> en = {
     'appName': 'My App',
@@ -597,7 +601,7 @@ class StringsConstants {
 }
 ''';
 
-String _apiConsumerCode() => '''
+String _apiConsumerCode(String projectName) => '''
 abstract class ApiConsumer {
   Future<dynamic> get(String path, {Map<String, dynamic>? queryParameters});
   Future<dynamic> post(String path, {Map<String, dynamic>? body});
@@ -607,10 +611,10 @@ abstract class ApiConsumer {
 
 ''';
 
-String _dioConsumerCode() => '''
+String _dioConsumerCode(String projectName) => '''
 import 'package:dio/dio.dart';
-import 'core/data_layer/errors/exceptions.dart';
-import 'core/data_layer/network/status_code.dart';
+import 'package:$projectName/core/data_layer/errors/exceptions.dart';
+import 'package:$projectName/core/data_layer/network/status_code.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 import 'api_consumer.dart';
@@ -711,7 +715,7 @@ class DioConsumer implements ApiConsumer {
 }
 ''';
 
-String _interceptorsCode() => '''
+String _interceptorsCode(String projectName) => '''
 import 'package:dio/dio.dart';
 import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 
@@ -738,7 +742,7 @@ class AppInterceptors {
 }
 ''';
 
-String _statusCodeCode() => '''
+String _statusCodeCode(String projectName) => '''
 class StatusCode {
   static const int ok = 200;
   static const int badRequest = 400;
@@ -750,7 +754,7 @@ class StatusCode {
 }
 ''';
 
-String _exceptionsCode() => '''
+String _exceptionsCode(String projectName) => '''
 abstract class AppException implements Exception {
   final String message;
   final int statusCode;
@@ -768,7 +772,7 @@ class CacheException extends AppException {
 }
 ''';
 
-String _failuresCode() => '''
+String _failuresCode(String projectName) => '''
 abstract class Failure {
   final String message;
   final int statusCode;
@@ -785,7 +789,7 @@ class CacheFailure extends Failure {
 }
 ''';
 
-String _appUtilsCode() => '''
+String _appUtilsCode(String projectName) => '''
 class AppUtils {
  static bool isEmailValid(String email) {
    return RegExp(r'^[^@]+@[^@]+.[^@]+').hasMatch(email);
@@ -815,7 +819,7 @@ class AppUtils {
 
 ''';
 
-String _appPrefsCode() => '''
+String _appPrefsCode(String projectName) => '''
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 
@@ -928,7 +932,7 @@ class AppPreferences {
 }
 ''';
 
-String _appOfflineBuilderCode() => '''
+String _appOfflineBuilderCode(String projectName) => '''
 import 'package:flutter/material.dart';
 import 'package:flutter_offline/flutter_offline.dart';
 
@@ -976,7 +980,7 @@ class AppOfflineBuilder extends StatelessWidget {
 }
  ''';
 
-String _appEnvSettingsCode() => '''
+String _appEnvSettingsCode(String projectName) => '''
 import 'package:flutter/foundation.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
@@ -995,7 +999,7 @@ class Environment {
 }
  ''';
 
-String _localeServiceCode() => '''
+String _localeServiceCode(String projectName) => '''
 import 'package:flutter/material.dart';
 import '../constants/app_constants.dart';
 import 'package:easy_localization/easy_localization.dart';
@@ -1017,7 +1021,7 @@ class LocaleService {
  Locale getCurrentLocale() {
 
 
-   final localeCode = AppPreferences().getData(AppConstants.localeKey);
+   final localeCode = AppPreferences().getData(AC.localeKey);
    if (localeCode != null) {
      return Locale(localeCode);
    }
@@ -1027,7 +1031,7 @@ class LocaleService {
 
  /// Save locale and update easy_localization
  Future<void> setLocale(BuildContext context, String languageCode) async {
-   await AppPreferences().setData(AppConstants.localeKey, languageCode);
+   await AppPreferences().setData(AC.localeKey, languageCode);
    await context.setLocale(Locale(languageCode));
  }
 }
@@ -1035,7 +1039,7 @@ class LocaleService {
 
 ''';
 
-String _themeServiceCode() => '''
+String _themeServiceCode(String projectName) => '''
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../theme/app_colors.dart';
@@ -1170,7 +1174,7 @@ class AppTheme {
 
 ''';
 
-String _navigationExtCode() => '''
+String _navigationExtCode(String projectName) => '''
 //! NAVIGATION EXTENSION
 import 'package:flutter/material.dart';
 
@@ -1252,7 +1256,7 @@ extension NavigationExtensions on BuildContext {
 
 ''';
 
-String _sizedBoxExtCode() => '''
+String _sizedBoxExtCode(String projectName) => '''
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
@@ -1263,10 +1267,10 @@ double get screenHeight => 1.sh;
 
 ''';
 
-String _baseRepositoryCode() => '''
+String _baseRepositoryCode(String projectName) => '''
 import 'package:dartz/dartz.dart';
-import 'core/data_layer/errors/exceptions.dart';
-import 'core/data_layer/errors/failures.dart';
+import 'package:$projectName/core/data_layer/errors/exceptions.dart';
+import 'package:$projectName/core/data_layer/errors/failures.dart';
 
 abstract class BaseRepository {
   Future<Either<Failure, T>> guardApiCall<T>(
@@ -1283,13 +1287,162 @@ abstract class BaseRepository {
 }
 ''';
 
-String _categoryRepositoryCode() => '''
+String _categoryModelCode(String projectName) => '''
+class MainService {
+  List<MainServiceData>? data;
+  String? message;
+  bool? isSuccess;
+
+  MainService({this.data, this.message, this.isSuccess});
+
+  MainService.fromJson(Map<String, dynamic> json) {
+    if (json['data'] != null) {
+      data = <MainServiceData>[];
+      json['data'].forEach((v) {
+        data!.add(MainServiceData.fromJson(v));
+      });
+    }
+    message = json['message'];
+    isSuccess = json['isSucess'];
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = <String, dynamic>{};
+    if (this.data != null) {
+      data['data'] = this.data!.map((v) => v.toJson()).toList();
+    }
+    data['message'] = message;
+    data['isSucess'] = isSuccess;
+    return data;
+  }
+}
+
+class MainServiceData {
+  String? descAr;
+  String? descOt;
+  String? icon;
+  int? activeForUserAdd;
+  int? activeForAppDisplay;
+  int? sortOrder;
+  List<MainSubServiceMappings>? mainSubServiceMappings;
+  String? id;
+  String? createdBy;
+  String? createdDate;
+  String? modifiedBy;
+  String? modifiedDate;
+
+  MainServiceData(
+      {this.descAr,
+      this.descOt,
+      this.icon,
+      this.activeForUserAdd,
+      this.activeForAppDisplay,
+      this.sortOrder,
+      this.mainSubServiceMappings,
+      this.id,
+      this.createdBy,
+      this.createdDate,
+      this.modifiedBy,
+      this.modifiedDate});
+
+  MainServiceData.fromJson(Map<String, dynamic> json) {
+    descAr = json['descAr'];
+    descOt = json['descOt'];
+    icon = json['icon'];
+    activeForUserAdd = json['activeForUserAdd'];
+    activeForAppDisplay = json['activeForAppDisplay'];
+    sortOrder = json['sortOrder'];
+    if (json['mainSubServiceMappings'] != null) {
+      mainSubServiceMappings = <MainSubServiceMappings>[];
+      json['mainSubServiceMappings'].forEach((v) {
+        mainSubServiceMappings!.add(MainSubServiceMappings.fromJson(v));
+      });
+    }
+    id = json['id'];
+    createdBy = json['createdBy'];
+    createdDate = json['createdDate'];
+    modifiedBy = json['modifiedBy'];
+    modifiedDate = json['modifiedDate'];
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['descAr'] = descAr;
+    data['descOt'] = descOt;
+    data['icon'] = icon;
+    data['activeForUserAdd'] = activeForUserAdd;
+    data['activeForAppDisplay'] = activeForAppDisplay;
+    data['sortOrder'] = sortOrder;
+    if (mainSubServiceMappings != null) {
+      data['mainSubServiceMappings'] =
+          mainSubServiceMappings!.map((v) => v.toJson()).toList();
+    }
+    data['id'] = id;
+    data['createdBy'] = createdBy;
+    data['createdDate'] = createdDate;
+    data['modifiedBy'] = modifiedBy;
+    data['modifiedDate'] = modifiedDate;
+    return data;
+  }
+}
+
+class MainSubServiceMappings {
+  String? mainServiceId;
+  String? mainServiceName;
+  String? subServiceId;
+  String? subServiceName;
+  String? id;
+  String? createdBy;
+  String? createdDate;
+  Null modifiedBy;
+  Null modifiedDate;
+
+  MainSubServiceMappings(
+      {this.mainServiceId,
+      this.mainServiceName,
+      this.subServiceId,
+      this.subServiceName,
+      this.id,
+      this.createdBy,
+      this.createdDate,
+      this.modifiedBy,
+      this.modifiedDate});
+
+  MainSubServiceMappings.fromJson(Map<String, dynamic> json) {
+    mainServiceId = json['mainServiceId'];
+    mainServiceName = json['mainServiceName'];
+    subServiceId = json['subServiceId'];
+    subServiceName = json['subServiceName'];
+    id = json['id'];
+    createdBy = json['createdBy'];
+    createdDate = json['createdDate'];
+    modifiedBy = json['modifiedBy'];
+    modifiedDate = json['modifiedDate'];
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['mainServiceId'] = mainServiceId;
+    data['mainServiceName'] = mainServiceName;
+    data['subServiceId'] = subServiceId;
+    data['subServiceName'] = subServiceName;
+    data['id'] = id;
+    data['createdBy'] = createdBy;
+    data['createdDate'] = createdDate;
+    data['modifiedBy'] = modifiedBy;
+    data['modifiedDate'] = modifiedDate;
+    return data;
+  }
+}
+ ''';
+
+String _categoryRepositoryCode(String projectName) => '''
 //This is just a sample repository for categories
 import 'package:dartz/dartz.dart';
-import 'core/data_layer/errors/failures.dart';
-import 'core/data_layer/models/category/category_model.dart';
-import 'core/data_layer/network/api_consumer.dart';
-import 'core/data_layer/repository/base/base_repository.dart';
+import 'package:$projectName/core/data_layer/errors/failures.dart';
+import 'package:$projectName/core/data_layer/models/category/category_model.dart';
+import 'package:$projectName/core/data_layer/network/api_consumer.dart';
+import 'package:$projectName/core/data_layer/repository/base/base_repository.dart';
 
 class CategoryRepository extends BaseRepository {
   final ApiConsumer apiConsumer;
@@ -1305,7 +1458,7 @@ class CategoryRepository extends BaseRepository {
 }
 ''';
 
-String _themeExtCode() => '''
+String _themeExtCode(String projectName) => '''
 //! THEME EXTENSION
 import 'package:flutter/material.dart';
 
@@ -1463,8 +1616,8 @@ ColorScheme get colorScheme => Theme.of(this).colorScheme;
 
 String _splashScreenCode(projectName) => '''
 import 'dart:async';
-import 'core/general_layer/extensions/navigation_extensions.dart';
-import 'core/general_layer/routing/routes.dart';
+import 'package:$projectName/core/general_layer/extensions/navigation_extensions.dart';
+import 'package:$projectName/core/general_layer/routing/routes.dart';
 import 'package:flutter/material.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -1501,7 +1654,7 @@ class _SplashScreenState extends State<SplashScreen> {
 }
 ''';
 
-String _categoryStateCode() => '''
+String _categoryStateCode(String projectName) => '''
 part of 'category_cubit.dart';
 
 sealed class CategoryState {}
@@ -1524,11 +1677,11 @@ class CategoryError extends CategoryState {
 
 ''';
 
-String _categoryCubitCode() => '''
+String _categoryCubitCode(String projectName) => '''
 import 'package:dartz/dartz.dart';
-import 'core/data_layer/errors/failures.dart';
-import 'core/data_layer/models/category/category_model.dart';
-import 'core/data_layer/repository/category/category_repository.dart';
+import 'package:$projectName/core/data_layer/errors/failures.dart';
+import 'package:$projectName/core/data_layer/models/category/category_model.dart';
+import 'package:$projectName/core/data_layer/repository/category/category_repository.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 part 'category_state.dart';
@@ -1551,11 +1704,11 @@ class CategoryCubit extends Cubit<CategoryState> {
 }
 ''';
 
-String _localeCubitCode() => '''
+String _localeCubitCode(String projectName) => '''
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../utils/app_shared_preferences.dart';
-import '../../constants/app_constants.dart';
+import 'package:$projectName/core/general_layer/utils/app_shared_preferences.dart';
+import 'package:$projectName/core/general_layer/constants/app_constants.dart';
 
 
 part 'locale_state.dart';
@@ -1566,13 +1719,13 @@ class LocaleCubit extends Cubit<LocaleState> {
 
 
  static Locale _getInitialLocale() {
-   final savedLocale = AppPreferences().getData(AppConstants.localeKey);
+   final savedLocale = AppPreferences().getData(AC.localeKey);
    return savedLocale == 'ar' ? const Locale('ar') : const Locale('en');
  }
 
 
  Future<void> changeLocale(Locale newLocale) async {
-   await AppPreferences().setData(AppConstants.localeKey, newLocale.languageCode);
+   await AppPreferences().setData(AC.localeKey, newLocale.languageCode);
    emit(LocaleState(newLocale));
  }
 }
@@ -1580,7 +1733,7 @@ class LocaleCubit extends Cubit<LocaleState> {
 
 ''';
 
-String _loginCubitCode() => '''
+String _loginCubitCode(String projectName) => '''
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 part 'login_state.dart';
@@ -1602,7 +1755,7 @@ class LoginCubit extends Cubit<LoginState> {
 }
 ''';
 
-String _loginEventCode() => '''
+String _loginEventCode(String projectName) => '''
 part of 'login_bloc.dart';
 
 sealed class LoginEvent extends Equatable {
@@ -1623,7 +1776,7 @@ class UserLoginEvent extends LoginEvent {
 }
 ''';
 
-String _loginBlocCode() => '''
+String _loginBlocCode(String projectName) => '''
 import 'dart:async';
 
 import 'package:equatable/equatable.dart';
@@ -1649,7 +1802,7 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
 }
 ''';
 
-String _loginStateCode() => '''
+String _loginStateCode(String projectName) => '''
 part of 'login_bloc.dart';
 
 sealed class LoginState {}
@@ -1671,11 +1824,11 @@ final class LoginError extends LoginState {
 }
 ''';
 
-String _themeCubitCode() => '''
+String _themeCubitCode(String projectName) => '''
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../utils/app_shared_preferences.dart';
-import '../../constants/app_constants.dart';
+import 'package:$projectName/core/general_layer/utils/app_shared_preferences.dart';
+import 'package:$projectName/core/general_layer/constants/app_constants.dart';
 
 
 part 'theme_state.dart';
@@ -1686,7 +1839,7 @@ class ThemeCubit extends Cubit<ThemeState> {
 
 
  static ThemeMode _getInitialTheme() {
-   final savedTheme = AppPreferences().getData(AppConstants.themeKey);
+   final savedTheme = AppPreferences().getData(AC.themeKey);
    if (savedTheme == 'dark') return ThemeMode.dark;
    if (savedTheme == 'light') return ThemeMode.light;
    return ThemeMode.system;
@@ -1694,22 +1847,20 @@ class ThemeCubit extends Cubit<ThemeState> {
 
 
  Future<void> changeTheme(ThemeMode newTheme) async {
-   await AppPreferences().setData(AppConstants.themeKey, newTheme.name);
+   await AppPreferences().setData(AC.themeKey, newTheme.name);
    emit(ThemeState(newTheme));
  }
 }
-
-
 ''';
 
 String _appRouterCode(String projectName) => '''
-import 'core/data_layer/models/category/category_model.dart';
-import 'core/general_layer/routing/routes.dart' show Routes;
-import 'features/Login/presentation/screens/login_screen.dart';
-import 'features/home/presentation/screens/app_category_details_screen.dart';
-import 'features/home/presentation/screens/app_home_screen.dart';
-import 'features/onboarding/presentation/screens/onboarding_screen.dart';
-import 'features/splash/presentation/screens/splash_screen.dart';
+import 'package:$projectName/core/data_layer/models/category/category_model.dart';
+import 'package:$projectName/core/general_layer/routing/routes.dart' show Routes;
+import 'package:$projectName/features/Login/presentation/screens/login_screen.dart';
+import 'package:$projectName/features/home/presentation/screens/app_category_details_screen.dart';
+import 'package:$projectName/features/home/presentation/screens/app_home_screen.dart';
+import 'package:$projectName/features/onboarding/presentation/screens/onboarding_screen.dart';
+import 'package:$projectName/features/splash/presentation/screens/splash_screen.dart';
 import 'package:flutter/material.dart';
 
 class AppRouter {
@@ -1745,7 +1896,7 @@ class AppRouter {
 }
 ''';
 
-String _routesCode() => '''
+String _routesCode(String projectName) => '''
 class Routes {
   static const String initialScreen = '/';
   static const String splashScreen = '/splashScreen';
@@ -1757,7 +1908,7 @@ class Routes {
 }
 ''';
 
-String _appThemeCode() => '''
+String _appThemeCode(String projectName) => '''
 import 'package:flutter/material.dart';
 
 import 'app_colors.dart';
@@ -1795,7 +1946,7 @@ class AppTheme {
 }
 ''';
 
-String _appColorsCode() => '''
+String _appColorsCode(String projectName) => '''
 import 'package:flutter/material.dart';
 
 
@@ -1808,7 +1959,7 @@ class AppColor {
 }
 ''';
 
-String _genCode() => '''
+String _genCode(String projectName) => '''
 // import 'package:clean_gen_tool/clean_gen_tool.dart';
 //
 // void main() async {
@@ -1816,24 +1967,24 @@ String _genCode() => '''
 // }
  ''';
 
-String _mainCode() => '''
+String _mainCode(String projectName) => '''
 import 'package:dio/dio.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'core/business_layer/bloc/login/login_bloc.dart';
-import 'core/business_layer/cubit/category/category_cubit.dart';
-import 'core/business_layer/cubit/locale/locale_cubit.dart';
-import 'core/business_layer/cubit/theme/theme_cubit.dart';
-import 'core/data_layer/network/dio_consumer.dart';
-import 'core/data_layer/repository/category/category_repository.dart';
-import 'core/general_layer/routing/app_router.dart';
-import 'core/general_layer/utils/app_env_settings.dart';
-import 'core/general_layer/utils/app_shared_preferences.dart';
+import 'package:$projectName/core/business_layer/bloc/login/login_bloc.dart';
+import 'package:$projectName/core/business_layer/cubit/category/category_cubit.dart';
+import 'package:$projectName/core/business_layer/cubit/locale/locale_cubit.dart';
+import 'package:$projectName/core/business_layer/cubit/theme/theme_cubit.dart';
+import 'package:$projectName/core/data_layer/network/dio_consumer.dart';
+import 'package:$projectName/core/data_layer/repository/category/category_repository.dart';
+import 'package:$projectName/core/general_layer/routing/app_router.dart';
+import 'package:$projectName/core/general_layer/utils/app_env_settings.dart';
+import 'package:$projectName/core/general_layer/utils/app_shared_preferences.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'app.dart';
 import 'app_bloc_observer.dart';
-import 'core/general_layer/constants/app_constants.dart';
+import 'package:$projectName/core/general_layer/constants/app_constants.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -1867,17 +2018,17 @@ void main() async {
 }
 ''';
 
-String _appCode() => '''
+String _appCode(String projectName) => '''
 import 'package:easy_localization/easy_localization.dart';
-import 'core/business_layer/cubit/theme/theme_cubit.dart';
-import 'core/general_layer/constants/app_constants.dart';
-import 'core/general_layer/routing/app_router.dart';
-import 'core/general_layer/utils/app_offline_builder.dart';
+import 'package:$projectName/core/business_layer/cubit/theme/theme_cubit.dart';
+import 'package:$projectName/core/general_layer/constants/app_constants.dart';
+import 'package:$projectName/core/general_layer/routing/app_router.dart';
+import 'package:$projectName/core/general_layer/utils/app_offline_builder.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-import 'core/general_layer/theme/app_theme.dart';
+import 'package:$projectName/core/general_layer/theme/app_theme.dart';
 
 class MyApp extends StatelessWidget {
   final AppRouter appRouter;
@@ -1910,7 +2061,7 @@ class MyApp extends StatelessWidget {
 }
 ''';
 
-String _blocObserverCode() => '''
+String _blocObserverCode(String projectName) => '''
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 
@@ -1945,10 +2096,10 @@ class AppBlocObserver extends BlocObserver {
 ''';
 
 String _loginScreenCode(String projectName) => '''
-import 'core/business_layer/bloc/login/login_bloc.dart';
-import 'core/general_layer/extensions/navigation_extensions.dart';
-import 'core/general_layer/routing/routes.dart';
-import 'core/general_layer/utils/app_validation_utils.dart';
+import 'package:$projectName/core/business_layer/bloc/login/login_bloc.dart';
+import 'package:$projectName/core/general_layer/extensions/navigation_extensions.dart';
+import 'package:$projectName/core/general_layer/routing/routes.dart';
+import 'package:$projectName/core/general_layer/utils/app_validation_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -2188,7 +2339,7 @@ class OnboardPage extends StatelessWidget {
 
 ''';
 
-String signupScreenCode() => '''
+String signupScreenCode(String projectName) => '''
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
@@ -2224,7 +2375,7 @@ class SignUpScreen extends StatelessWidget {
 }
 ''';
 
-String _themeStateCode() => '''
+String _themeStateCode(String projectName) => '''
 part of 'theme_cubit.dart';
 
 
@@ -2247,7 +2398,7 @@ class ThemeState {
 }
 ''';
 
-String _localeStateCode() => '''
+String _localeStateCode(String projectName) => '''
 part of 'locale_cubit.dart';
 
 
