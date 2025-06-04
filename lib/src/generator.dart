@@ -4,12 +4,14 @@ import 'package:path/path.dart';
 
 /// A code generation utility for creating Clean Architecture structure.
 class CleanGenTool {
+  /// Project version.
+  static String projectVersion = '1.0.6';
+
   /// Generates the folder structure and files at the given [targetPath].
   static Future<void> generate() async {
     final projectDir = Directory.current;
     final projectName = basename(projectDir.path);
     final libDir = Directory(join(projectDir.path, 'lib'));
-
     await _generateReadme(projectDir, projectName); //done
     await _generateDotEnv(projectDir, projectName); //done
     await _generateAssetsFolders(projectDir); //done
@@ -137,7 +139,7 @@ Contact: richardchalger@gmail.com
 First add the package to your pubspec.yaml:
 ```yaml
 dependencies:
-  clean_gen_tool: ^1.0.5
+  clean_gen_tool: ^${CleanGenTool.projectVersion}
 ```
 ---
 Or run the following command in your terminal:
@@ -510,6 +512,7 @@ dependencies:
   flutter_dotenv: ^5.2.1
   pretty_dio_logger:
   path:
+  clean_gen_tool: ^${CleanGenTool.projectVersion}
 
 dev_dependencies:
   flutter_test:
@@ -1897,8 +1900,8 @@ String _appRouterCode(String projectName) => '''
 import 'package:$projectName/core/data_layer/models/category/category_model.dart';
 import 'package:$projectName/core/general_layer/routing/routes.dart' show Routes;
 import 'package:$projectName/features/Login/presentation/screens/login_screen.dart';
-import 'package:$projectName/features/home/presentation/screens/app_category_details_screen.dart';
-import 'package:$projectName/features/home/presentation/screens/app_home_screen.dart';
+import 'package:$projectName/features/home/presentation/screens/home_details_screen.dart';
+import 'package:$projectName/features/home/presentation/screens/home_screen.dart';
 import 'package:$projectName/features/onboarding/presentation/screens/onboarding_screen.dart';
 import 'package:$projectName/features/splash/presentation/screens/splash_screen.dart';
 import 'package:flutter/material.dart';
@@ -2142,7 +2145,6 @@ import 'package:$projectName/core/general_layer/constants/app_constants.dart';
 import 'package:$projectName/core/general_layer/constants/endpoint_constants.dart';
 import 'package:$projectName/core/general_layer/extensions/navigation_extensions.dart';
 import 'package:$projectName/core/general_layer/routing/routes.dart';
-import 'package:$projectName/generated/assets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -2267,10 +2269,10 @@ class _AppHomeScreenState extends State<AppHomeScreen> {
                                       width: double.infinity,
                                       height: double.infinity,
                                       color: AC.xWhite,
-                                      placeholder: Assets.imagesLoading,
-                                      image: '{EC.baseImageUrl}{item.icon!}',
+                                      placeholder: 'https://placehold.co/600x400',
+                                      image: 'https://placehold.co/600x400',
                                     )
-                                  : Image.asset(Assets.imagesPlaceholder),
+                                  : Image.asset('https://placehold.co/600x400'),
                             ),
                           ),
                         ),
@@ -2307,7 +2309,6 @@ String _homeDetailsScreenCode(String projectName) => '''
 import 'package:$projectName/core/data_layer/models/category/category_model.dart';
 import 'package:$projectName/core/general_layer/constants/app_constants.dart';
 import 'package:$projectName/core/general_layer/constants/endpoint_constants.dart';
-import 'package:$projectName/generated/assets.dart';
 import 'package:flutter/material.dart';
 
 class HomeScreenDetails extends StatelessWidget {
@@ -2327,8 +2328,8 @@ class HomeScreenDetails extends StatelessWidget {
               color: AC.xMainColor,
               child: Image.network(
                 category.icon!.isNotEmpty
-                    ? '{EC.baseImageUrl}{category.icon}'
-                    : Assets.imagesPlaceholder,
+                    ? 'https://placehold.co/600x400'
+                    : 'https://placehold.co/600x400',
                 height: 400,
                 width: double.infinity,
                 color: AC.xWhite,

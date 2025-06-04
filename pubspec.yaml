@@ -1,6 +1,6 @@
 name: clean_gen_tool
 description: CleanGenTool is a Dart package designed to help developers create and manage clean architecture projects efficiently. It provides a command-line interface to generate boilerplate code, ensuring a consistent structure across your Dart applications.
-version: 1.0.5
+version: 1.0.6
 repository: https://github.com/Mohammad-AD/clean_gen_tool
 
 environment:
