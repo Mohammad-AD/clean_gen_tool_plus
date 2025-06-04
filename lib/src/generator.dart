@@ -2,7 +2,9 @@ import 'dart:io';
 
 import 'package:path/path.dart';
 
+/// A code generation utility for creating Clean Architecture structure.
 class CleanGenTool {
+  /// Generates the folder structure and files at the given [targetPath].
   static Future<void> generate() async {
     final projectDir = Directory.current;
     final projectName = basename(projectDir.path);
@@ -2341,42 +2343,6 @@ class OnboardPage extends StatelessWidget {
 }
 
 
-''';
-
-String signupScreenCode(String projectName) => '''
-import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
-
-
-class SignUpScreen extends StatelessWidget {
- const SignUpScreen({super.key});
-
-
- @override
- Widget build(BuildContext context) {
-   return Scaffold(
-     appBar: AppBar(title: const Text('Sign Up')),
-     body: Padding(
-       padding: EdgeInsets.all(20.w),
-       child: Column(
-         crossAxisAlignment: CrossAxisAlignment.stretch,
-         children: [
-           const TextField(decoration: InputDecoration(labelText: 'Name')),
-           SizedBox(height: 16.h),
-           const TextField(decoration: InputDecoration(labelText: 'Email')),
-           SizedBox(height: 16.h),
-           const TextField(obscureText: true, decoration: InputDecoration(labelText: 'Password')),
-           SizedBox(height: 24.h),
-           ElevatedButton(
-             onPressed: () {},
-             child: const Text('Create Account'),
-           ),
-         ],
-       ),
-     ),
-   );
- }
-}
 ''';
 
 String _themeStateCode(String projectName) => '''

@@ -1,5 +1,5 @@
 Clean Flutter Architecture,
-Clean Gen-Tool By Mohammad AD
+Clean Gen-Tool
 
 Contact: richardchalger@gmail.com
 

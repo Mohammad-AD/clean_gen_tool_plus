@@ -13,3 +13,7 @@
 ## 1.0.3
 
 - Fixes and improvements.
+
+## 1.0.4
+
+- Fixes and improvements.
