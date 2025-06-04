@@ -137,7 +137,7 @@ Contact: richardchalger@gmail.com
 First add the package to your pubspec.yaml:
 ```yaml
 dependencies:
-  clean_gen_tool: ^1.0.4
+  clean_gen_tool: ^1.0.5
 ```
 ---
 Or run the following command in your terminal:
@@ -357,7 +357,7 @@ Future<void> _generateCore(Directory libDir, String projectName) async {
     },
     'business_layer/cubit/login': {
       'login_cubit.dart': _loginCubitCode(projectName), //done
-      'login_state.dart': _loginStateCode(projectName), //done
+      'login_state.dart': _loginCubitStateCode(projectName), //done
     },
     'business_layer/cubit/theme': {
       'theme_cubit.dart': _themeCubitCode(projectName), //done
@@ -402,10 +402,14 @@ Future<void> _generateFeatures(Directory libDir, String projectName) async {
   final loginDir = Directory(
     join(featuresDir.path, 'login/presentation/screens'),
   );
+  final homeDir = Directory(
+    join(featuresDir.path, 'home/presentation/screens'),
+  );
 
   await splashDir.create(recursive: true);
   await onboardingDir.create(recursive: true);
   await loginDir.create(recursive: true);
+  await homeDir.create(recursive: true);
 
   await File(
     join(splashDir.path, 'splash_screen.dart'),
@@ -418,6 +422,14 @@ Future<void> _generateFeatures(Directory libDir, String projectName) async {
   await File(
     join(loginDir.path, 'login_screen.dart'),
   ).writeAsString(_loginScreenCode(projectName));
+
+  await File(
+    join(homeDir.path, 'home_screen.dart'),
+  ).writeAsString(_homeScreenCode(projectName));
+
+  await File(
+    join(homeDir.path, 'home_details_screen.dart'),
+  ).writeAsString(_homeDetailsScreenCode(projectName));
 }
 
 Future<void> _generateMainApp(Directory libDir, String projectName) async {
@@ -1830,6 +1842,28 @@ final class LoginError extends LoginState {
 }
 ''';
 
+String _loginCubitStateCode(String projectName) => '''
+part of 'login_cubit.dart';
+
+sealed class LoginState {}
+
+final class LoginInitial extends LoginState {}
+
+final class LoginLoading extends LoginState {}
+
+final class LoginSuccessful extends LoginState {
+  final String msg;
+
+  LoginSuccessful(this.msg);
+}
+
+final class LoginError extends LoginState {
+  final String errorMsg;
+
+  LoginError(this.errorMsg);
+}
+''';
+
 String _themeCubitCode(String projectName) => '''
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -1881,7 +1915,7 @@ class AppRouter {
         return _createRoute(const AppHomeScreen());
       case Routes.homeDetailsScreen:
         final item = settings.arguments as MainServiceData;
-        return _createRoute(AppCategoryDetailsScreen(category: item));
+        return _createRoute(HomeScreenDetails(category: item));
       case Routes.loginScreen:
         return _createRoute(LoginScreen());
 
@@ -2100,6 +2134,223 @@ class AppBlocObserver extends BlocObserver {
  }
 }
 ''';
+
+String _homeScreenCode(String projectName) => '''
+import 'package:$projectName/core/business_layer/cubit/category/category_cubit.dart';
+import 'package:$projectName/core/data_layer/models/category/category_model.dart';
+import 'package:$projectName/core/general_layer/constants/app_constants.dart';
+import 'package:$projectName/core/general_layer/constants/endpoint_constants.dart';
+import 'package:$projectName/core/general_layer/extensions/navigation_extensions.dart';
+import 'package:$projectName/core/general_layer/routing/routes.dart';
+import 'package:$projectName/generated/assets.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+
+class AppHomeScreen extends StatefulWidget {
+  const AppHomeScreen({super.key});
+
+  @override
+  State<AppHomeScreen> createState() => _AppHomeScreenState();
+}
+
+class _AppHomeScreenState extends State<AppHomeScreen> {
+  MainService? mainServices;
+  MainService? searchServices;
+  bool isSearch = false;
+  final searchController = TextEditingController();
+  final focusNode = FocusNode();
+
+  @override
+  void initState() {
+    super.initState();
+    BlocProvider.of<CategoryCubit>(context).getAllCategories();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Categories'),
+        backgroundColor: AC.xMainColor,
+        actions: [
+          isSearch
+              ? IconButton(
+                  onPressed: () {
+                    isSearch = false;
+                    searchController.clear();
+                    searchServices = null;
+                    setState(() {});
+                  },
+                  icon: const Icon(Icons.clear))
+              : IconButton(
+                  onPressed: () {
+                    isSearch = true;
+                    focusNode.requestFocus();
+                    setState(() {});
+                  },
+                  icon: const Icon(Icons.search))
+        ],
+      ),
+      body: SingleChildScrollView(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Visibility(
+              visible: isSearch,
+              child: TextFormField(
+                controller: searchController,
+                focusNode: focusNode,
+                decoration: const InputDecoration(
+                  hintText: 'Search for category',
+                  fillColor: AC.xWhite,
+                  filled: true,
+                  border: OutlineInputBorder(),
+                ),
+                onChanged: findCategory,
+              ),
+            ),
+            BlocConsumer<CategoryCubit, CategoryState>(
+              listener: (context, state) {
+                if (state is CategoryLoaded) {
+                  mainServices = state.data;
+                }
+              },
+              builder: (context, state) {
+                if (state is CategoryLoading) {
+                  return const Center(child: CircularProgressIndicator());
+                } else if (state is CategoryError) {
+                  return Center(child: Text(state.message));
+                } else if (state is CategoryLoaded) {
+                  final items =
+                      searchServices?.data ?? mainServices?.data ?? [];
+
+                  if (items.isEmpty) {
+                    return const Center(child: Text('No categories found'));
+                  }
+
+                  return GridView.builder(
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 3,
+                      childAspectRatio: 2 / 3,
+                      crossAxisSpacing: 2,
+                      mainAxisSpacing: 3,
+                    ),
+                    shrinkWrap: true,
+                    padding: const EdgeInsets.symmetric(vertical: 4),
+                    itemCount: items.length,
+                    itemBuilder: (context, index) {
+                      final item = items[index];
+                      return InkWell(
+                        onTap: () {
+                          context.pushNamed(Routes.homeDetailsScreen,
+                              arguments: item);
+                        },
+                        child: GridTile(
+                          footer: Container(
+                            width: double.infinity,
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 15, vertical: 10),
+                            color: Colors.black54,
+                            alignment: Alignment.bottomCenter,
+                            child: Text(
+                              item.descOt!,
+                              style: const TextStyle(color: AC.xWhite),
+                            ),
+                          ),
+                          child: Hero(
+                            tag: item.id!,
+                            child: Container(
+                              color: AC.xMainColor,
+                              child: item.icon!.isNotEmpty
+                                  ? FadeInImage.assetNetwork(
+                                      width: double.infinity,
+                                      height: double.infinity,
+                                      color: AC.xWhite,
+                                      placeholder: Assets.imagesLoading,
+                                      image: '{EC.baseImageUrl}{item.icon!}',
+                                    )
+                                  : Image.asset(Assets.imagesPlaceholder),
+                            ),
+                          ),
+                        ),
+                      );
+                    },
+                  );
+                } else {
+                  return const Center(child: CircularProgressIndicator());
+                }
+              },
+            )
+          ],
+        ),
+      ),
+    );
+  }
+
+  void findCategory(String char) {
+    if (char.isNotEmpty) {
+      searchServices = MainService();
+      searchServices!.data = mainServices!.data!
+          .where((element) =>
+              element.descOt!.toLowerCase().startsWith(char.toLowerCase()))
+          .toList();
+    } else {
+      searchServices = null;
+    }
+    setState(() {});
+  }
+}
+ ''';
+
+String _homeDetailsScreenCode(String projectName) => '''
+import 'package:$projectName/core/data_layer/models/category/category_model.dart';
+import 'package:$projectName/core/general_layer/constants/app_constants.dart';
+import 'package:$projectName/core/general_layer/constants/endpoint_constants.dart';
+import 'package:$projectName/generated/assets.dart';
+import 'package:flutter/material.dart';
+
+class HomeScreenDetails extends StatelessWidget {
+  final MainServiceData category;
+
+  const HomeScreenDetails({required this.category, super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(),
+      body: Column(
+        children: [
+          Hero(
+            tag: category.id!,
+            child: Container(
+              color: AC.xMainColor,
+              child: Image.network(
+                category.icon!.isNotEmpty
+                    ? '{EC.baseImageUrl}{category.icon}'
+                    : Assets.imagesPlaceholder,
+                height: 400,
+                width: double.infinity,
+                color: AC.xWhite,
+                fit: BoxFit.scaleDown,
+              ),
+            ),
+          ),
+          Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
+              color: Colors.black54,
+              alignment: Alignment.bottomCenter,
+              child: Text(
+                category.descOt!,
+                style: const TextStyle(color: AC.xWhite, fontSize: 20),
+              )),
+        ],
+      ),
+    );
+  }
+}
+ ''';
 
 String _loginScreenCode(String projectName) => '''
 import 'package:$projectName/core/business_layer/bloc/login/login_bloc.dart';

@@ -15,5 +15,8 @@
 - Fixes and improvements.
 
 ## 1.0.4
-
 - Fixes and improvements.
+
+## 1.0.5
+- Fixes and improvements.
+- Added a sample home screen
