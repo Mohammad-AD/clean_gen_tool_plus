@@ -1,7 +1,7 @@
 name: clean_gen_tool
 description: A starting point for Dart libraries or applications.
 version: 1.0.0
-repository: https://github.com/Mohammad-AD/bloc_eg
+repository: https://github.com/Mohammad-AD/clean_gen_tool
 
 environment:
   sdk: '>=3.0.0 <4.0.0'
