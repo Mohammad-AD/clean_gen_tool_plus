@@ -129,27 +129,31 @@ Clean Gen-Tool By Mohammad AD
 
 Contact: richardchalger@gmail.com
 
-
+---
 # How To Use
 
 First add the package to your pubspec.yaml:
 ```yaml
 dependencies:
-  clean_gen_tool: ^1.0.1
+  clean_gen_tool: ^1.0.3
 ```
+---
 Or run the following command in your terminal:
 With Dart:
 ```bash
   dart pub add clean_gen_tool
 ```
+---
 With Flutter:
 ```bash
   flutter pub add clean_gen_tool
 ```
+---
 Import it
 ```bash
   import 'package:clean_gen_tool/clean_gen_tool.dart';
 ```
+---
 Create a new file named `gen_tool.dart` in the `lib` directory of your Flutter project.
 and add the following code to it:
 ```dart
@@ -159,6 +163,7 @@ import 'package:clean_gen_tool/clean_gen_tool.dart';
    await CleanGenTool.generate();
  }
 ```
+---
 Then run the generator tool to generate the necessary files and structure:
 ```bash
   dart run lib/gen_tool.dart
@@ -296,7 +301,6 @@ dart lib/generate_structure.dart > structure.txt
 
 Built with ❤️
 Special thanks to Abdullah Essam for the inspiration and guidance.
-
 ''');
 }
 
