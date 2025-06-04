@@ -2003,7 +2003,7 @@ class AppColor {
 ''';
 
 String _genCode(String projectName) => '''
-// import 'package:clean_gen_tool/clean_gen_tool.dart';
+// import 'package:clean_gen_tool/clean_gen_tool_plus.dart';
 //
 // void main() async {
 //   await CleanGenTool.generate();
