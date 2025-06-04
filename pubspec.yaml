@@ -1,7 +1,7 @@
 name: clean_gen_tool_plus
 description: CleanGenToolPlus is a Dart package designed to help developers create and manage clean architecture projects efficiently.
 version: 1.0.0
-repository: https://github.com/Mohammad-AD/clean_gen_tool
+repository: https://github.com/Mohammad-AD/clean_gen_tool_plus
 
 environment:
   sdk: '>=3.0.0 <4.0.0'

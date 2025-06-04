@@ -28,7 +28,7 @@ void main(List<String> arguments) async {
 
     print('🚀 Generating Flutter Clean Architecture project: $projectName');
 
-    await CleanGenTool.generate();
+    await CleanGenToolPlus.generate();
 
     print('✅ Project generated successfully!');
     print('👉 Next steps:');

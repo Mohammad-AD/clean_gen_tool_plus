@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:path/path.dart';
 
 /// A code generation utility for creating Clean Architecture structure.
-class CleanGenTool {
+class CleanGenToolPlus {
   /// Project version.
   static String projectVersion = '1.0.0';
 
@@ -139,7 +139,7 @@ Contact: richardchalger@gmail.com
 First add the package to your pubspec.yaml:
 ```yaml
 dependencies:
-  clean_gen_tool_plus: ^${CleanGenTool.projectVersion}
+  clean_gen_tool_plus: ^${CleanGenToolPlus.projectVersion}
 ```
 ---
 Or run the following command in your terminal:
@@ -512,7 +512,7 @@ dependencies:
   flutter_dotenv: ^5.2.1
   pretty_dio_logger:
   path:
-  clean_gen_tool: ^${CleanGenTool.projectVersion}
+  clean_gen_tool: ^${CleanGenToolPlus.projectVersion}
 
 dev_dependencies:
   flutter_test:
