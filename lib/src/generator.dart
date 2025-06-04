@@ -137,7 +137,7 @@ Contact: richardchalger@gmail.com
 First add the package to your pubspec.yaml:
 ```yaml
 dependencies:
-  clean_gen_tool: ^1.0.3
+  clean_gen_tool: ^1.0.4
 ```
 ---
 Or run the following command in your terminal:
