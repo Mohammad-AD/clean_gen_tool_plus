@@ -512,7 +512,7 @@ dependencies:
   flutter_dotenv: ^5.2.1
   pretty_dio_logger:
   path:
-  clean_gen_tool: ^${CleanGenToolPlus.projectVersion}
+  clean_gen_tool_plus: ^${CleanGenToolPlus.projectVersion}
 
 dev_dependencies:
   flutter_test:
