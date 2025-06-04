@@ -5,11 +5,11 @@
 ///
 /// Example usage:
 /// ```dart
-/// import 'package:clean_gen_tool/clean_gen_tool.dart';
+/// import 'package:clean_gen_tool_plus/clean_gen_tool_plus.dart';
 ///
 /// final generator = CleanGenTool();
 /// await generator.generate();
 /// ```
-library clean_gen_tool;
+library clean_gen_tool_plus;
 
 export 'src/generator.dart';

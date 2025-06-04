@@ -5,7 +5,7 @@ import 'package:path/path.dart';
 /// A code generation utility for creating Clean Architecture structure.
 class CleanGenTool {
   /// Project version.
-  static String projectVersion = '1.0.6';
+  static String projectVersion = '1.0.0';
 
   /// Generates the folder structure and files at the given [targetPath].
   static Future<void> generate() async {
@@ -139,29 +139,29 @@ Contact: richardchalger@gmail.com
 First add the package to your pubspec.yaml:
 ```yaml
 dependencies:
-  clean_gen_tool: ^${CleanGenTool.projectVersion}
+  clean_gen_tool_plus: ^${CleanGenTool.projectVersion}
 ```
 ---
 Or run the following command in your terminal:
 With Dart:
 ```bash
-  dart pub add clean_gen_tool
+  dart pub add clean_gen_tool_plus
 ```
 ---
 With Flutter:
 ```bash
-  flutter pub add clean_gen_tool
+  flutter pub add clean_gen_tool_plus
 ```
 ---
 Import it
 ```bash
-  import 'package:clean_gen_tool/clean_gen_tool.dart';
+  import 'package:clean_gen_tool_plus/clean_gen_tool_plus.dart';
 ```
 ---
 Create a new file named `gen_tool.dart` in the `lib` directory of your Flutter project.
 and add the following code to it:
 ```dart
-import 'package:clean_gen_tool/clean_gen_tool.dart';
+import 'package:clean_gen_tool_plus/clean_gen_tool_plus.dart';
 
  void main() async {
    await CleanGenTool.generate();

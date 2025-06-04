@@ -3,7 +3,7 @@
 import 'dart:io';
 
 import 'package:args/args.dart';
-import 'package:clean_gen_tool/src/generator.dart';
+import 'package:clean_gen_tool_plus/src/generator.dart';
 
 void main(List<String> arguments) async {
   final parser = ArgParser()

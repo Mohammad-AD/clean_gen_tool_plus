@@ -1,4 +1,4 @@
-import 'package:clean_gen_tool/clean_gen_tool.dart';
+import 'package:clean_gen_tool_plus/clean_gen_tool.dart';
 
 Future<void> main() async {
   // Use this command to generate the code
