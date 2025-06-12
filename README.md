@@ -47,7 +47,7 @@ and add the following code to it:
 import 'package:clean_gen_tool_plus/clean_gen_tool_plus.dart';
 
  void main() async {
-   await CleanGenTool.generate();
+   await CleanGenToolPlus.generate();
  }
 ```
 ---
