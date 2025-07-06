@@ -13,3 +13,4 @@
 library clean_gen_tool_plus;
 
 export 'src/generator.dart';
+export 'src/logger.dart';
