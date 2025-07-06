@@ -2,41 +2,84 @@ import 'dart:io';
 
 import 'package:path/path.dart';
 
+import 'logger.dart';
+
 /// A code generation utility for creating Clean Architecture structure.
 class CleanGenToolPlus {
   /// Project version.
-  static String projectVersion = '1.0.1';
+  static String projectVersion = '1.0.2';
 
   /// Generates the folder structure and files at the given [targetPath].
   static Future<void> generate() async {
     final projectDir = Directory.current;
     final projectName = basename(projectDir.path);
     final libDir = Directory(join(projectDir.path, 'lib'));
-    await _generateReadme(projectDir, projectName); //done
-    await _generateDotEnv(projectDir, projectName); //done
-    await _generateAssetsFolders(projectDir); //done
-    await _generatePubspecYaml(projectDir, projectName); //done
-    await _generateLocalizationFiles(projectDir); //done
-    await _generateMainApp(libDir, projectName); //done
-    await _generateFeatures(libDir, projectName); //done
-    await _generateCore(libDir, projectName); //done
+    if (!libDir.existsSync()) {
+      systemLogInfo('Creating lib directory...');
+      await libDir.create(recursive: true);
+    }
+    systemLogInfo(
+        'Generating Clean Architecture structure for $projectName...');
+    systemLogWarning('Generating Readme');
+    await _generateReadme(
+        projectDir, projectName); // checked true / status done
 
-    print(
-        '\nFlutter project is fully ready with Clean Architecture by Mohammad AD - GenTool');
+    systemLogWarning('Generating .env file...');
+    await _generateDotEnv(
+        projectDir, projectName); // checked true / status done
+
+    systemLogWarning('Generating assets folders...');
+    await _generateAssetsFolders(projectDir); // checked true / status done
+
+    systemLogWarning('Generating pubspec.yaml...');
+    await _generatePubspecYaml(
+        projectDir, projectName); // checked true / status done
+
+    systemLogWarning('Generating Localization files...');
+    await _generateLocalizationFiles(projectDir); // checked true / status done
+
+    systemLogWarning('Generating Main files...');
+    await _generateMainApp(libDir, projectName); // checked true / status done
+
+    systemLogWarning('Generating Features files...');
+    await _generateFeatures(libDir, projectName); // checked true / status done
+
+    systemLogWarning('Generating Core files...');
+    await _generateCore(libDir, projectName); // checked true / status done
+
+    systemLogAction(
+        '\nFlutter project is fully ready with Clean Architecture by Mohammad AD - GenTool',
+        'SUCCESS');
   }
+}
+
+/// Logging utility warning functions
+void systemLogWarning(String message) {
+  Logger.yellow.log('📙 [CleanGENTOOLPlus] [Warning] $message');
+}
+
+/// Logging utility info functions
+void systemLogInfo(String message) {
+  Logger.green.log('📗 [CleanGENTOOLPlus] [INFO] $message');
+}
+
+/// Logging utility Error functions
+void systemLogError(String context, Object e) {
+  Logger.red.log('📕 [CleanGENTOOLPlus] [ERROR] [$context]: $e');
+}
+
+/// Logging utility action functions
+void systemLogAction(String context, Object e) {
+  Logger.blue.log('📘 [CleanGENTOOLPlus] [Action] [$context]: $e');
 }
 
 Future<void> _generateDotEnv(Directory projectDir, String projectName) async {
   final readmeFile = File(join(projectDir.path, '.env'));
   await readmeFile.writeAsString('''
-   //Make sure to add your API keys and other environment variables here.
-
-   API_KEY=https://url:port/api/
-   API_IMAGES_KEY=https://url:port/assets/images/
-   API_KEY_FB_ANDROID=API_KEY_FB_ANDROID
-   API_KEY_FB_IOS=API_KEY_FB_IOS
-
-   //Mohammad AD 
+//Make sure to add your API keys and other environment variables here.
+API_URL=https://url:port/api/
+// add your keys/urls here
+//Mohammad AD 
 ''');
 }
 
@@ -44,7 +87,6 @@ Future<void> _generateAssetsFolders(Directory projectDir) async {
   final assetDirs = [
     'assets/images',
     'assets/icons',
-    'assets/lottie',
     'assets/keystore',
     'assets/lang',
   ];
@@ -164,7 +206,7 @@ and add the following code to it:
 import 'package:clean_gen_tool_plus/clean_gen_tool_plus.dart';
 
  void main() async {
-   await CleanGenTool.generate();
+   await CleanGenToolPlus.generate();
  }
 ```
 ---
@@ -192,14 +234,23 @@ It includes:
 - PrettyDioLogger for the best dio logging for debuggers
 - Offline Builder in case internet went off
 - A ready to use General Layer to help use in the app :
-    * constants / routing / theme / env settings / offline builder / shared preference
+    * constants / routing / theme / env settings / offline builder / shared preference / Queue Request / utils 
+    * services like Dio, SharedPreferences, Connectivity, and more 
+    * extensions for common types
+    * routing with auto_route
+    * Dependency Injection using get_it
+  and many many more
+- A ready to use responsive layouts and builders 
+    * check rs_seek plugin for examples on how to implement responsive layouts
 
 The project is built following the Clean Architecture principles, broken down into three main
 layers:
 
-* business_layer – Manages state using Cubits (Bloc)
+* business_layer – Manages state using (Bloc)
 * data_layer – Handles models, networking, and repositories
 * general_layer – Contains constants, services, utilities, routing, and more
+* Dependency Injection – Uses get_it for service locator pattern
+* Features – Organized by feature, each with its own presentation layer
 
 ## Structure
 
@@ -302,9 +353,7 @@ dart lib/generate_structure.dart > structure.txt
 ---
 
 ## Credits
-
-Built with ❤️
-Special thanks to Abdullah Essam for the inspiration and guidance.
+Built with ❤️ by Mohammad Al-Adarbi
 ''');
 }
 
@@ -316,68 +365,85 @@ Future<void> _generateCore(Directory libDir, String projectName) async {
       'endpoint_constants.dart': _endpointConstantsCode(projectName), // done
       'strings_constants.dart': _stringsConstantsCode(projectName), // done
     },
-    'data_layer/network': {
-      'api_consumer.dart': _apiConsumerCode(projectName), // done
-      'dio_consumer.dart': _dioConsumerCode(projectName), // done
-      'interceptors.dart': _interceptorsCode(projectName), // done
-      'status_code.dart': _statusCodeCode(projectName), // done
+    'general_layer/extensions': {
+      'navigation_extensions.dart': _navigationExtCode(projectName), // done
+      'sizedbox_extensions.dart': _sizedBoxExtCode(projectName), // done
+      'theme_extensions.dart': _themeExtCode(projectName), // done
+    },
+    'general_layer/methods': {
+      'general_methods.dart': _generalMethodsCode(projectName), // done
+    },
+    'general_layer/routing': {
+      'app_router_settings.dart': _appRouterCode(projectName), // done
+      'app_routes_list.dart': _routesCode(projectName), // done
+    },
+    'general_layer/services': {
+      'locale_service.dart': _localeServiceCode(projectName), // done
+      'theme_service.dart': _themeServiceCode(projectName), // done
+      'network_service.dart': _netWorkServiceCode(projectName), // done
+      'timer_service.dart': _timerServiceCode(projectName), // done
+    },
+    'general_layer/theme': {
+      'app_theme.dart': _appThemeCode(projectName), // done
+      'app_colors.dart': _appColorsCode(projectName), // done
+    },
+    'general_layer/utils': {
+      'app_env_settings.dart': _appEnvSettingsCode(projectName),
+      // done
+      'app_location_service.dart': _appLocationServiceCode(projectName),
+      // done
+      'app_logger_utility.dart': _appLoggerUtility(projectName),
+      // done
+      'app_network_storage.dart': _appNetWorkStorage(projectName),
+      // done
+      'app_notification_storage.dart': _appNotificationStorage(projectName),
+      // done
+      'app_offline_builder.dart': _appOfflineBuilderCode(projectName),
+      // done
+      'app_secure_storage.dart': _appSecureStorage(projectName),
+      // done
+      'app_shared_preferences.dart': _appPrefsCode(projectName),
+      // done
+      'app_validation_utils.dart': _appValidationUtilsCode(projectName),
+      // done
+    },
+    'general_layer/widgets': {
+      'app_error_widget.dart': _appErrorWidget(projectName), // done
+      'app_general_widgets.dart': _appGeneralWidgets(projectName), // done
     },
     'data_layer/errors': {
       'exceptions.dart': _exceptionsCode(projectName), // done
       'failures.dart': _failuresCode(projectName), // done
     },
-    'general_layer/utils': {
-      'app_validation_utils.dart': _appUtilsCode(projectName), // done
-      'app_shared_preferences.dart': _appPrefsCode(projectName), // done
-      'app_offline_builder.dart': _appOfflineBuilderCode(projectName), // done
-      'app_env_settings.dart': _appEnvSettingsCode(projectName), // done
+    'data_layer/models/const_models': {
+      'offline_queue_model.dart': _offlineQueueModel(projectName), // done
     },
-    'general_layer/services': {
-      'locale_service.dart': _localeServiceCode(projectName), // done
-      'theme_service.dart': _themeServiceCode(projectName), // done
+    'data_layer/network': {
+      'api_consumer.dart': _apiConsumerCode(projectName), // done
+      'dio_consumer.dart': _dioConsumerCode(projectName), // done
+      'interceptors.dart': _interceptorsCode(projectName), // done
+      'status_code.dart': _statusCodeCode(projectName), // done
+      'queue_consumer.dart': _queueConsumer(projectName), // done
     },
-    'general_layer/routing': {
-      'app_router.dart': _appRouterCode(projectName), //done
-      'routes.dart': _routesCode(projectName), //done
+    'data_layer/repository/base': {
+      'base_repository.dart': _baseRepositoryCode(projectName), // done
+      'login_repository.dart': _loginRepository(projectName), // done
     },
-    'general_layer/theme': {
-      'app_theme.dart': _appThemeCode(projectName), //done
-      'app_colors.dart': _appColorsCode(projectName), //done
+    'data_layer/': {
+      'di_service_layer.dart': _diServiceLayer(projectName), // done
     },
     'business_layer/bloc/login': {
-      'login_bloc.dart': _loginBlocCode(projectName), //done
-      'login_event.dart': _loginEventCode(projectName), //done
-      'login_state.dart': _loginStateCode(projectName), //done
-    },
-    'business_layer/cubit/category': {
-      'category_cubit.dart': _categoryCubitCode(projectName), //done
-      'category_state.dart': _categoryStateCode(projectName), //done
+      'login_bloc.dart': _loginBlocCode(projectName), // done
+      'login_event.dart': _loginEventCode(projectName), // done
+      'login_state.dart': _loginStateCode(projectName), // done
     },
     'business_layer/cubit/locale': {
-      'locale_cubit.dart': _localeCubitCode(projectName), //done
-      'locale_state.dart': _localeStateCode(projectName), //done
-    },
-    'business_layer/cubit/login': {
-      'login_cubit.dart': _loginCubitCode(projectName), //done
-      'login_state.dart': _loginCubitStateCode(projectName), //done
+      'locale_cubit.dart': _localeCubitCode(projectName), // done
+      'locale_state.dart': _localeStateCode(projectName), // done
     },
     'business_layer/cubit/theme': {
-      'theme_cubit.dart': _themeCubitCode(projectName), //done
-      'theme_state.dart': _themeStateCode(projectName), //done
-    },
-    'data_layer/models/category': {
-      'category_model.dart': _categoryModelCode(projectName), //done
-    }, //done
-    'data_layer/repository/base': {
-      'base_repository.dart': _baseRepositoryCode(projectName), //done
-    },
-    'data_layer/repository/category': {
-      'category_repository.dart': _categoryRepositoryCode(projectName), //done
-    },
-    'general_layer/extensions': {
-      'navigation_extensions.dart': _navigationExtCode(projectName), //done
-      'sizedbox_extensions.dart': _sizedBoxExtCode(projectName), //done
-      'theme_extensions.dart': _themeExtCode(projectName), //done
+      'theme_cubit.dart': _themeCubitCode(projectName), // done
+      'theme_state.dart': _themeStateCode(projectName), // done
     },
   };
 
@@ -398,9 +464,6 @@ Future<void> _generateFeatures(Directory libDir, String projectName) async {
   final splashDir = Directory(
     join(featuresDir.path, 'splash/presentation/screens'),
   );
-  final onboardingDir = Directory(
-    join(featuresDir.path, 'onboarding/presentation/screens'),
-  );
   final loginDir = Directory(
     join(featuresDir.path, 'login/presentation/screens'),
   );
@@ -409,47 +472,43 @@ Future<void> _generateFeatures(Directory libDir, String projectName) async {
   );
 
   await splashDir.create(recursive: true);
-  await onboardingDir.create(recursive: true);
   await loginDir.create(recursive: true);
   await homeDir.create(recursive: true);
 
   await File(
     join(splashDir.path, 'splash_screen.dart'),
-  ).writeAsString(_splashScreenCode(projectName)); //done
+  ).writeAsString(_splashScreenCode(projectName)); // done
 
   await File(
-    join(onboardingDir.path, 'onboarding_screen.dart'),
-  ).writeAsString(_onboardingScreenCode(projectName));
+    join(splashDir.path, 'initializer_screen.dart'),
+  ).writeAsString(_appInitializerCode(projectName)); // done
 
   await File(
     join(loginDir.path, 'login_screen.dart'),
-  ).writeAsString(_loginScreenCode(projectName));
+  ).writeAsString(_loginScreenCode(projectName)); // done
 
   await File(
-    join(homeDir.path, 'home_screen.dart'),
-  ).writeAsString(_homeScreenCode(projectName));
-
-  await File(
-    join(homeDir.path, 'home_details_screen.dart'),
-  ).writeAsString(_homeDetailsScreenCode(projectName));
+    join(homeDir.path, 'notification_screen.dart'),
+  ).writeAsString(_notificationScreen(projectName)); // done
 }
 
 Future<void> _generateMainApp(Directory libDir, String projectName) async {
   await File(join(libDir.path, 'main.dart'))
-      .writeAsString(_mainCode(projectName));
+      .writeAsString(_mainCode(projectName)); //done
+
   await File(join(libDir.path, 'gen_tool.dart'))
-      .writeAsString(_genCode(projectName));
+      .writeAsString(_genCode(projectName)); //done
+
   await File(join(libDir.path, 'app.dart'))
-      .writeAsString(_appCode(projectName));
+      .writeAsString(_appCode(projectName)); //done
+
   await File(
     join(libDir.path, 'app_bloc_observer.dart'),
-  ).writeAsString(_blocObserverCode(projectName));
+  ).writeAsString(_blocObserverCode(projectName)); //done
 }
 
-Future<void> _generatePubspecYaml(
-  Directory projectDir,
-  String projectName,
-) async {
+Future<void> _generatePubspecYaml(Directory projectDir,
+    String projectName,) async {
   final flutterCmd = Platform.isWindows ? 'flutter.bat' : 'flutter';
 
   late final String flutterVersionOutput;
@@ -473,7 +532,7 @@ Future<void> _generatePubspecYaml(
     r'Flutter\s(\d+\.\d+\.\d+)',
   ).firstMatch(flutterVersionOutput);
   final flutterVersion =
-      flutterMatch != null ? flutterMatch.group(1)! : 'unknown';
+  flutterMatch != null ? flutterMatch.group(1)! : 'unknown';
 
   final pubspecContent = '''
 name: $projectName
@@ -492,37 +551,35 @@ dependencies:
   shared_preferences:
   easy_localization:
   intl:
+  uuid:
   equatable:
   get_it:
   cached_network_image:
   flutter_screenutil:
-  flutter_animate:
-  freezed_annotation:
-  json_annotation:
   flutter_native_splash:
-  animate_do:
-  lottie:
-  google_fonts:
-  flutter_launcher_icons:
-  animator:
   dartz:
-  flutter_svg:
-  cupertino_icons:
   flutter_offline: ^5.0.0
   flutter_dotenv: ^5.2.1
   pretty_dio_logger:
   path:
+  rs_seek: ^1.0.0
+  geolocator: ^14.0.1
+  permission_handler: ^12.0.0+1
+  change_app_package_name: ^1.5.0
+  get:
+  flutter_secure_storage: 9.2.4
+  connectivity_plus:
+  after_layout: ^1.2.0
+  platform_device_id_plus: ^1.0.7
+
+
+
+  cupertino_icons:
   clean_gen_tool_plus: ^${CleanGenToolPlus.projectVersion}
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  build_runner:
-  freezed:
-  json_serializable:
-  bloc_test:
-  mockito:
-  flutter_lints:
 
 flutter:
   uses-material-design: true
@@ -530,7 +587,6 @@ flutter:
   assets:
     - assets/images/
     - assets/icons/
-    - assets/lottie/
     - assets/lang/
     - .env
 ''';
@@ -538,17 +594,26 @@ flutter:
   final file = File(join(projectDir.path, 'pubspec.yaml'));
   await file.writeAsString(pubspecContent);
 
-  print(
-      'Pubspec.yaml generated successfully with Flutter version $flutterVersion');
+  systemLogAction(
+      'Pubspec.yaml generated successfully with Flutter version $flutterVersion',
+      'SUCCESS');
 }
 
 // ============================ الأكواد ============================
 
 String _appConstantsCode(String projectName) => '''
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart' as format;
 
 class AC {
-  static const String appName = 'My App';
+   // 📕: error message
+  // 📙: warning message
+  // 📗: ok status message
+  // 📘: action message
+  // 📓: canceled status message
+  // 📔: Or anything you like and want to recognize immediately by color
+
+  static const String appName = 'MDM Tracker';
   static const List<Locale> supportedLocales = [Locale('en'), Locale('ar')];
   static const String localeKey = 'app_locale';
   static const String themeKey = 'app_theme';
@@ -584,15 +649,32 @@ class AC {
   static const Color xTransparent = Colors.transparent;
   static const Color secondColor = Color(0xFFDFD9FF);
   static const Color xFieldColor = Color.fromRGBO(246, 248, 248, 1);
+
+  static format.DateFormat get dateFormat => format.DateFormat('yyyy-MM-dd');
+
+  static format.DateFormat get timeFormat => format.DateFormat('hh:mm');
+
+  static format.DateFormat get timeMiliFormat => format.DateFormat('mm:ss');
+
+  static format.DateFormat get dateTimeFormat => format.DateFormat('yyyy-MM-ddThh:mm:ss');
+
+  static format.DateFormat get dateTimeFormat24 => format.DateFormat('yyyy-MM-ddTHH:MM:SS');
+
+  static format.DateFormat get dateTimeFormatted => format.DateFormat('yyyy-MM-dd hh:mm:ss');
+
+  static String deviceToken = '';
+  static String deviceId = '';
+
+  static final GlobalKey<NavigatorState> navigatorKey =  GlobalKey<NavigatorState>();
 }
 ''';
 
 String _endpointConstantsCode(String projectName) => '''
-import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:$projectName/core/general_layer/utils/app_env_settings.dart';
 
 class EC {
-  static final String baseUrl = dotenv.env['API_KEY']!;
-  static final String baseImageUrl = dotenv.env['API_IMAGES_KEY']!;
+  static final String baseUrl = Environment.apiKey;
+  static final String baseImageUrl = Environment.apiImagesUrl;
 }
 
 ''';
@@ -629,29 +711,33 @@ abstract class ApiConsumer {
   Future<dynamic> put(String path, {Map<String, dynamic>? body});
   Future<dynamic> delete(String path);
 }
-
 ''';
 
 String _dioConsumerCode(String projectName) => '''
-import 'package:dio/dio.dart';
 import 'package:$projectName/core/data_layer/errors/exceptions.dart';
 import 'package:$projectName/core/data_layer/network/status_code.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:$projectName/core/general_layer/methods/general_methods.dart';
+import 'package:$projectName/core/general_layer/utils/app_env_settings.dart';
+import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
+import 'package:get_it/get_it.dart';
 
 import 'api_consumer.dart';
 import 'interceptors.dart';
 
 class DioConsumer implements ApiConsumer {
   final Dio client;
+  final AppInterceptors appInterceptors = AppInterceptors();
+  final gmd = GetIt.instance<GeneralMethods>();
 
   DioConsumer({required this.client}) {
     client.options
-      ..baseUrl = dotenv.env['API_KEY']!
+      ..baseUrl = Environment.apiKey
       ..responseType = ResponseType.json
       ..connectTimeout = const Duration(seconds: 15)
       ..receiveTimeout = const Duration(seconds: 15);
 
-    client.interceptors.addAll(AppInterceptors.getInterceptors());
+    client.interceptors.addAll(appInterceptors.getInterceptors());
   }
 
   @override
@@ -660,8 +746,8 @@ class DioConsumer implements ApiConsumer {
     try {
       final response = await client.get(path, queryParameters: queryParameters);
       return response.data;
-    } on DioException catch (error) {
-      _handleDioError(error);
+    } catch (error) {
+      _handleAnyError(error);
     }
   }
 
@@ -670,8 +756,8 @@ class DioConsumer implements ApiConsumer {
     try {
       final response = await client.post(path, data: body);
       return response.data;
-    } on DioException catch (error) {
-      _handleDioError(error);
+    } catch (error) {
+      _handleAnyError(error);
     }
   }
 
@@ -680,8 +766,8 @@ class DioConsumer implements ApiConsumer {
     try {
       final response = await client.put(path, data: body);
       return response.data;
-    } on DioException catch (error) {
-      _handleDioError(error);
+    } catch (error) {
+      _handleAnyError(error);
     }
   }
 
@@ -690,58 +776,107 @@ class DioConsumer implements ApiConsumer {
     try {
       final response = await client.delete(path, data: body);
       return response.data;
-    } on DioException catch (error) {
+    } catch (error) {
+      _handleAnyError(error);
+    }
+  }
+
+  void _handleAnyError(Object error) {
+    if (error is DioException) {
       _handleDioError(error);
+    } else {
+      if (!kReleaseMode) {
+        throw const ServerException('Unknown Network Error');
+      }
     }
   }
 
   void _handleDioError(DioException error) {
     final int statusCode =
         error.response?.statusCode ?? StatusCode.internalServerError;
-    final String message = error.response?.data?['message'] ?? error.message;
 
     switch (error.type) {
       case DioExceptionType.connectionTimeout:
       case DioExceptionType.sendTimeout:
       case DioExceptionType.receiveTimeout:
-        throw const ServerException('Connection Timeout');
+      case DioExceptionType.unknown:
+      case DioExceptionType.connectionError:
+        gmd.systemLogError('No Internet Connection', error.type);
+        if (!kReleaseMode) {
+          throw RetryableException('No Internet Connection');
+        }
 
       case DioExceptionType.cancel:
-        throw const ServerException('Request Cancelled');
+        gmd.systemLogError('Request Cancelled', error.type);
+        if (!kReleaseMode) {
+          throw const ServerException('Request Cancelled');
+        }
 
       case DioExceptionType.badResponse:
         switch (statusCode) {
           case StatusCode.badRequest:
-            throw ServerException('Bad Request: message', statusCode);
+            gmd.systemLogError('Bad Request: message', statusCode);
+            if (!kReleaseMode) {
+              throw ServerException('Bad Request: message', statusCode);
+            }
           case StatusCode.unauthorized:
-            throw ServerException('Unauthorized: message', statusCode);
+            gmd.systemLogError('Unauthorized: message', statusCode);
+            if (!kReleaseMode) {
+              throw ServerException('Unauthorized: message', statusCode);
+            }
           case StatusCode.forbidden:
-            throw ServerException('Forbidden: message', statusCode);
+            gmd.systemLogError('Forbidden: message', statusCode);
+            if (!kReleaseMode) {
+              throw ServerException('Forbidden: message', statusCode);
+            }
           case StatusCode.notFound:
-            throw ServerException('Not Found: message', statusCode);
+            gmd.systemLogError('Not Found: message', statusCode);
+            if (!kReleaseMode) {
+              throw ServerException('Not Found: message', statusCode);
+            }
           case StatusCode.conflict:
-            throw ServerException('Conflict: message', statusCode);
+            gmd.systemLogError('Conflict: message', statusCode);
+            if (!kReleaseMode) {
+              throw ServerException('Conflict: message', statusCode);
+            }
           case StatusCode.internalServerError:
-            throw ServerException(
-                'Internal Server Error: message', statusCode);
+            gmd.systemLogError('Internal Server Error: message', statusCode);
+            if (!kReleaseMode) {
+              throw ServerException(
+                  'Internal Server Error: message', statusCode);
+            }
           default:
-            throw ServerException('Unexpected Error: message', statusCode);
+            gmd.systemLogError('Unexpected Error: message', statusCode);
+            if (!kReleaseMode) {
+              throw ServerException('Unexpected Error: message', statusCode);
+            }
         }
-
-      case DioExceptionType.unknown:
-      default:
-        throw ServerException('Unknown Error: message', statusCode);
+      case DioExceptionType.badCertificate:
+        gmd.systemLogError('Bad Certificate Error', error.type);
+        if (!kReleaseMode) {
+          throw const ServerException('Bad Certificate Error');
+        }
     }
   }
+}
+
+class RetryableException implements Exception {
+  final String message;
+
+  RetryableException(this.message);
 }
 ''';
 
 String _interceptorsCode(String projectName) => '''
+import 'package:$projectName/core/general_layer/methods/general_methods.dart';
 import 'package:dio/dio.dart';
+import 'package:get_it/get_it.dart';
 import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 
 class AppInterceptors {
-  static List<Interceptor> getInterceptors() {
+  final gmd = GetIt.instance<GeneralMethods>();
+
+  List<Interceptor> getInterceptors() {
     return [
       InterceptorsWrapper(
         onRequest: (options, handler) {
@@ -756,9 +891,156 @@ class AppInterceptors {
         requestHeader: true,
         requestBody: true,
         responseHeader: true,
-        maxWidth: 120,
+        maxWidth: 140,
+        responseBody: true,
+        error: true,
+        logPrint: (object) {
+          gmd.systemLogWarning(object.toString());
+        },
       ),
     ];
+  }
+}
+''';
+
+String _diServiceLayer(String projectName) => '''
+import 'package:$projectName/core/data_layer/network/api_consumer.dart';
+import 'package:$projectName/core/data_layer/network/dio_consumer.dart';
+import 'package:$projectName/core/data_layer/network/queue_consumer.dart';
+import 'package:$projectName/core/general_layer/constants/app_constants.dart';
+import 'package:$projectName/core/general_layer/methods/general_methods.dart';
+import 'package:$projectName/core/general_layer/services/foreground_location_service.dart';
+import 'package:$projectName/core/general_layer/services/network_service.dart';
+import 'package:$projectName/core/general_layer/services/notification_service.dart';
+import 'package:$projectName/core/general_layer/services/device_storage_service.dart';
+import 'package:$projectName/core/general_layer/utils/app_env_settings.dart';
+import 'package:$projectName/core/general_layer/utils/app_location_service.dart';
+import 'package:$projectName/core/general_layer/utils/app_notification_storage.dart';
+import 'package:$projectName/core/general_layer/utils/app_secure_storage.dart';
+import 'package:$projectName/core/general_layer/utils/app_shared_preferences.dart';
+import 'package:$projectName/core/general_layer/widgets/app_general_widgets.dart';
+import 'package:dio/dio.dart';
+import 'package:get_it/get_it.dart';
+
+class ServiceLocator {
+  static Future<void> setup() async {
+    final getIt = GetIt.instance;
+    getIt.registerLazySingleton<AppPreferences>(() => AppPreferences());
+    getIt.registerLazySingleton<GeneralMethods>(() => GeneralMethods());
+    final gmd = getIt<GeneralMethods>();
+    getIt.registerLazySingleton<NotificationStore>(() => NotificationStore());
+
+    getIt.registerLazySingleton<LocationService>(() => LocationService());
+    getIt.registerLazySingleton<Environment>(() => Environment());
+    await getIt<Environment>().load();
+
+    getIt.registerLazySingleton<AC>(() => AC());
+    getIt.registerLazySingleton<Dio>(() => Dio());
+
+    getIt.registerLazySingleton<GeneralWidgets>(() => GeneralWidgets());
+
+    getIt.registerSingleton<DioConsumer>(DioConsumer(client: getIt<Dio>()));
+
+    getIt.registerLazySingleton<ApiConsumer>(() => getIt<DioConsumer>());
+    getIt.registerLazySingleton<NetworkRequestQueueService>(
+        () => NetworkRequestQueueService());
+    final queueService = getIt<NetworkRequestQueueService>();
+
+    getIt.registerLazySingleton<QueueApiConsumer>(() =>
+        QueueApiConsumer(
+            realApiConsumer: getIt<DioConsumer>(), queueService: queueService));
+
+    getIt.registerLazySingleton<SecureStorageService>(
+        () => SecureStorageService());
+
+  }
+}
+
+''';
+
+String _queueConsumer(String projectName) => '''
+import 'package:$projectName/core/data_layer/models/const_models/offline_queue_model.dart';
+import 'package:$projectName/core/data_layer/network/api_consumer.dart';
+import 'package:$projectName/core/data_layer/network/dio_consumer.dart';
+import 'package:$projectName/core/general_layer/services/network_service.dart';
+import 'package:uuid/uuid.dart';
+
+class QueueApiConsumer implements ApiConsumer {
+  final ApiConsumer _realApiConsumer;
+  final NetworkRequestQueueService _queueService;
+
+  QueueApiConsumer({
+    required ApiConsumer realApiConsumer,
+    required NetworkRequestQueueService queueService,
+  })  : _realApiConsumer = realApiConsumer,
+        _queueService = queueService;
+
+  @override
+  Future<dynamic> get(String path,
+      {Map<String, dynamic>? queryParameters}) async {
+    try {
+      return await _realApiConsumer.get(path, queryParameters: queryParameters);
+    } on RetryableException catch (_) {
+      await _queueService.addRequest(
+        OfflineRequest(
+          id: const Uuid().v4(),
+          path: path,
+          method: 'GET',
+          queryParameters: queryParameters,
+        ),
+      );
+      // rethrow;
+    }
+  }
+
+  @override
+  Future<dynamic> post(String path, {Map<String, dynamic>? body}) async {
+    try {
+      return await _realApiConsumer.post(path, body: body);
+    } on RetryableException catch (_) {
+      await _queueService.addRequest(
+        OfflineRequest(
+          id: const Uuid().v4(),
+          path: path,
+          method: 'POST',
+          body: body,
+        ),
+      );
+      // rethrow;
+    }
+  }
+
+  @override
+  Future<dynamic> put(String path, {Map<String, dynamic>? body}) async {
+    try {
+      return await _realApiConsumer.put(path, body: body);
+    } on RetryableException catch (_) {
+      await _queueService.addRequest(
+        OfflineRequest(
+          id: const Uuid().v4(),
+          path: path,
+          method: 'PUT',
+          body: body,
+        ),
+      );
+      // rethrow;
+    }
+  }
+
+  @override
+  Future<dynamic> delete(String path) async {
+    try {
+      return await _realApiConsumer.delete(path);
+    } on RetryableException catch (_) {
+      await _queueService.addRequest(
+        OfflineRequest(
+          id: const Uuid().v4(),
+          path: path,
+          method: 'DELETE',
+        ),
+      );
+      // rethrow;
+    }
   }
 }
 ''';
@@ -784,12 +1066,48 @@ abstract class AppException implements Exception {
 }
 
 class ServerException extends AppException {
-  const ServerException(
-      [super.message = 'Server Error', super.statusCode = 500]);
+  const ServerException([super.message = 'Server Error', super.statusCode = 500]);
 }
 
 class CacheException extends AppException {
   const CacheException([super.message = 'Cache Error', super.statusCode = 500]);
+}
+
+''';
+
+String _offlineQueueModel(String projectName) => '''
+class OfflineRequest {
+  final String id;
+  final String path;
+  final String method;
+  final Map<String, dynamic>? body;
+  final Map<String, dynamic>? queryParameters;
+
+  OfflineRequest({
+    required this.id,
+    required this.path,
+    required this.method,
+    this.body,
+    this.queryParameters,
+  });
+
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'path': path,
+        'method': method,
+        'body': body,
+        'queryParameters': queryParameters,
+      };
+
+  factory OfflineRequest.fromJson(Map<String, dynamic> json) {
+    return OfflineRequest(
+      id: json['id'],
+      path: json['path'],
+      method: json['method'],
+      body: json['body'],
+      queryParameters: json['queryParameters'],
+    );
+  }
 }
 ''';
 
@@ -810,34 +1128,721 @@ class CacheFailure extends Failure {
 }
 ''';
 
-String _appUtilsCode(String projectName) => '''
-class AppUtils {
- static bool isEmailValid(String email) {
-   return RegExp(r'^[^@]+@[^@]+.[^@]+').hasMatch(email);
- }
+String _appGeneralWidgets(String projectName) => '''
+import 'package:$projectName/core/general_layer/constants/app_constants.dart';
+import 'package:$projectName/generated/assets.dart';
+import 'package:flutter/material.dart';
+import 'package:get_it/get_it.dart';
+import 'package:rs_seek/rs_seek.dart';
 
+class GeneralWidgets {
+  final ac = GetIt.instance<AC>();
 
- static bool hasLowerCase(String password) {
-   return RegExp(r'^(?=.*[a-z])').hasMatch(password);
- }
+  Widget buildLogo() {
+    return Column(
+      children: [
+        RsAspectRatio(child: Image.asset(Assets.imagesLogo)),
+        const Text(
+          'DCP Tracker',
+          style: TextStyle(
+              fontSize: 28, fontWeight: FontWeight.bold, color: AC.xMainColor),
+        ),
+      ],
+    );
+  }
 
+  Widget buildSliverAppBar(String title,
+      {List<Widget>? actions, Widget? leading}) {
+    return SliverAppBar(
+      title: Text(title),
+      centerTitle: true,
+      backgroundColor: AC.xMainColor,
+      actions: actions,
+      leading: leading,
+      expandedHeight: 200.0,
+      flexibleSpace: FlexibleSpaceBar(
+        background: buildLogo(),
+      ),
+    );
+  }
 
- static bool hasUpperCase(String password) {
-   return RegExp(r'^(?=.*[A-Z])').hasMatch(password);
- }
+  Widget buildAppBar(String title, {List<Widget>? actions, Widget? leading}) {
+    return AppBar(
+        title: Text(title),
+        centerTitle: true,
+        backgroundColor: AC.xMainColor,
+        actions: actions,
+        leading: leading);
+  }
 
+  Widget buildTextField({
+    required TextEditingController controller,
+    required String label,
+    bool obscureText = false,
+    String? Function(String?)? validator,
+    int maxLines = 1,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: TextFormField(
+        controller: controller,
+        obscureText: obscureText,
+        maxLines: maxLines,
+        validator: validator,
+        decoration: InputDecoration(
+          labelText: label,
+          border: _buildOutlineInputBorder(),
+          enabledBorder: _buildOutlineInputBorder(),
+        ),
+      ),
+    );
+  }
 
- static bool hasNumber(String password) {
-   return RegExp(r'^(?=.*?[0-9])').hasMatch(password);
- }
+  OutlineInputBorder _buildOutlineInputBorder() {
+    return OutlineInputBorder(
+      borderSide: const BorderSide(color: AC.xMainColor, width: 1.5),
+      borderRadius: BorderRadius.circular(8),
+    );
+  }
 
+  Widget buildButton({
+    required String text,
+    required VoidCallback onPressed,
+    Color? color,
+    Color? textColor,
+  }) {
+    return ElevatedButton(
+      onPressed: onPressed,
+      style: ElevatedButton.styleFrom(
+        textStyle: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
+        backgroundColor: color ?? AC.xMainColor,
+        foregroundColor: textColor ?? Colors.white,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8),
+        ),
+      ),
+      child: FittedBox(child: Text(text)),
+    );
+  }
 
- static bool hasMinLength(String password) {
-   return RegExp(r'^(?=.{8,})').hasMatch(password);
- }
+  Widget buildSearchBarWithFocus(
+      String title, TextEditingController searchController, FocusNode focusNode,
+      {Function(String)? onChanged}) {
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: TextFormField(
+        controller: searchController,
+        focusNode: focusNode,
+        decoration: InputDecoration(
+          hintText: title,
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.all(Radius.circular(8.0)),
+            borderSide: BorderSide(color: AC.xMainColor),
+          ),
+          fillColor: Colors.white,
+          filled: true,
+        ),
+        onChanged: onChanged,
+      ),
+    );
+  }
+
+  Widget buildSearchBar(String title, TextEditingController searchController,
+      FocusNode focusNode, Function(String) callback) {
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: TextFormField(
+        controller: searchController,
+        focusNode: focusNode,
+        decoration: InputDecoration(
+          hintText: title,
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.all(Radius.circular(8.0)),
+            borderSide: BorderSide(color: AC.xMainColor),
+          ),
+          fillColor: Colors.white,
+          filled: true,
+        ),
+        onChanged: callback,
+      ),
+    );
+  }
+
+  Widget buildLoadingIndicator() {
+    return Center(
+      child: CircularProgressIndicator(
+        color: AC.xMainColor,
+      ),
+    );
+  }
+
+  Widget buildErrorWidget(String message) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24.0),
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.error_outline, color: Colors.red, size: 60),
+              const SizedBox(height: 16),
+              Text(
+                message,
+                style: TextStyle(
+                    color: Colors.red.shade700,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 16),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 20),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget buildIconButton(
+      {required IconData icon,
+      required VoidCallback onPressed,
+      Color? color,
+      double? size}) {
+    return IconButton(
+      icon: Icon(icon, color: color ?? AC.xMainColor, size: size ?? 24),
+      onPressed: onPressed,
+    );
+  }
+
+  Widget buildTextButton({
+    required String text,
+    required VoidCallback onPressed,
+    Color? color,
+    Color? textColor,
+  }) {
+    return TextButton(
+      onPressed: onPressed,
+      style: TextButton.styleFrom(
+        foregroundColor: textColor ?? Colors.white,
+        backgroundColor: color ?? AC.xMainColor,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8),
+        ),
+      ),
+      child: Text(text),
+    );
+  }
+
+  Widget buildDivider() {
+    return Divider(
+      color: AC.xMainColor,
+      thickness: 1.5,
+      height: 20,
+    );
+  }
+
+  SnackBar buildSnackBar(String message) {
+    return SnackBar(
+      content: Text(message),
+      backgroundColor: AC.xMainColor,
+      duration: const Duration(seconds: 2),
+    );
+  }
+
+  void showSnackBar(BuildContext context, String message) {
+    ScaffoldMessenger.of(context).showSnackBar(buildSnackBar(message));
+  }
+
+  Widget buildBottomNavigationBar(
+      {required List<BottomNavigationBarItem> items,
+      required int currentIndex,
+      required Function(int) onTap}) {
+    return BottomNavigationBar(
+      items: items,
+      currentIndex: currentIndex,
+      onTap: onTap,
+      selectedItemColor: AC.xMainColor,
+      unselectedItemColor: Colors.grey,
+    );
+  }
+
+  Widget buildCard({
+    required Widget child,
+    EdgeInsetsGeometry? margin,
+    EdgeInsetsGeometry? padding,
+    Color? color,
+  }) {
+    return Card(
+      margin: margin ?? const EdgeInsets.all(8.0),
+      color: color ?? Colors.white,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(8.0),
+      ),
+      child: Padding(
+        padding: padding ?? const EdgeInsets.all(16.0),
+        child: child,
+      ),
+    );
+  }
+
+  buildPadding({
+    required Widget child,
+    EdgeInsetsGeometry? padding,
+  }) {
+    return Padding(
+      padding: padding ?? const EdgeInsets.all(8.0),
+      child: child,
+    );
+  }
+
+  Widget buildDropdownButtonFormField<T>({
+    required List<T> items,
+    required T value,
+    required String hint,
+    required Function(T?) onChanged,
+    String? Function(T?)? validator,
+  }) {
+    return DropdownButtonFormField<T>(
+      value: value,
+      items: items.map((T item) {
+        return DropdownMenuItem<T>(
+          value: item,
+          child: Text(item.toString()),
+        );
+      }).toList(),
+      decoration: InputDecoration(
+        hintText: hint,
+        border: _buildOutlineInputBorder(),
+        enabledBorder: _buildOutlineInputBorder(),
+      ),
+      onChanged: onChanged,
+      validator: validator,
+    );
+  }
+
+  Widget buildFloatingActionButton({
+    required IconData icon,
+    required VoidCallback onPressed,
+    Color? backgroundColor,
+    Color? foregroundColor,
+  }) {
+    return FloatingActionButton(
+      onPressed: onPressed,
+      backgroundColor: backgroundColor ?? AC.xMainColor,
+      foregroundColor: foregroundColor ?? Colors.white,
+      child: Icon(icon),
+    );
+  }
+
+  Widget buildFooter() {
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Text(
+        '© ${DateTime
+    .now()
+    .year} DCP Tracker. All rights reserved.',
+        style: TextStyle(color: Colors.grey, fontSize: 12),
+        textAlign: TextAlign.center,
+      ),
+    );
+  }
+
+  Widget buildListTile({
+    required String title,
+    required String subtitle,
+    required IconData leadingIcon,
+    required VoidCallback onTap,
+  }) {
+    return ListTile(
+      leading: Icon(leadingIcon, color: AC.xMainColor),
+      title: Text(title),
+      subtitle: Text(subtitle),
+      onTap: onTap,
+    );
+  }
+
+  Widget buildCheckboxListTile({
+    required String title,
+    required bool value,
+    required Function(bool?) onChanged,
+  }) {
+    return CheckboxListTile(
+      title: Text(title),
+      value: value,
+      onChanged: onChanged,
+      activeColor: AC.xMainColor,
+    );
+  }
+
+  Widget buildSwitchListTile({
+    required String title,
+    required bool value,
+    required Function(bool) onChanged,
+  }) {
+    return SwitchListTile(
+      title: Text(title),
+      value: value,
+      onChanged: onChanged,
+      activeColor: AC.xMainColor,
+    );
+  }
+
+  Widget buildTooltip({
+    required String message,
+    required Widget child,
+    Color? backgroundColor,
+    TextStyle? textStyle,
+  }) {
+    return Tooltip(
+      message: message,
+      decoration: BoxDecoration(
+        color: backgroundColor ?? Colors.black87,
+        borderRadius: BorderRadius.circular(8.0),
+      ),
+      textStyle: textStyle ?? const TextStyle(color: Colors.white),
+      child: child,
+    );
+  }
+
+  Widget buildBanner({
+    required String message,
+    Color? backgroundColor,
+    Color? textColor,
+  }) {
+    return Banner(
+      message: message,
+      location: BannerLocation.topEnd,
+      color: backgroundColor ?? AC.xMainColor,
+      textStyle: TextStyle(color: textColor ?? Colors.white, fontSize: 16),
+      child: Container(),
+    );
+  }
+
+  Widget buildLanguageSelector({
+    required List<String> languages,
+    required String selectedLanguage,
+    required ValueChanged<String?>? onChanged,
+  }) {
+    return DropdownButtonFormField<String>(
+      value: selectedLanguage,
+      items: languages.map((String language) {
+        return DropdownMenuItem<String>(
+          value: language,
+          child: Text(language),
+        );
+      }).toList(),
+      decoration: InputDecoration(
+        hintText: 'Select Language',
+        border: _buildOutlineInputBorder(),
+        enabledBorder: _buildOutlineInputBorder(),
+      ),
+      onChanged: onChanged,
+    );
+  }
+
+  Widget buildDatePicker({
+    required BuildContext context,
+    required DateTime initialDate,
+    required Function(DateTime) onDateSelected,
+  }) {
+    return ElevatedButton(
+      onPressed: () async {
+        final DateTime? picked = await showDatePicker(
+          context: context,
+          initialDate: initialDate,
+          firstDate: DateTime(2000),
+          lastDate: DateTime(2101),
+        );
+        if (picked != null && picked != initialDate) {
+          onDateSelected(picked);
+        }
+      },
+      child: Text('Select Date'),
+    );
+  }
+
+  Widget buildListViewBuilderWithLoadingAndPagination<T>({
+    required List<T> items,
+    required Widget Function(BuildContext, T) itemBuilder,
+    required int itemCount,
+    required bool isLoading,
+    required VoidCallback onLoadMore,
+    required ScrollController scrollController,
+  }) {
+    scrollController.addListener(() {
+      if (scrollController.position.pixels >=
+              scrollController.position.maxScrollExtent &&
+          !isLoading) {
+        onLoadMore();
+      }
+    });
+
+    return ListView.builder(
+      controller: scrollController,
+      itemCount: isLoading ? itemCount + 1 : itemCount,
+      itemBuilder: (context, index) {
+        if (isLoading && index == itemCount) {
+          return Center(child: CircularProgressIndicator(color: AC.xMainColor));
+        }
+        return itemBuilder(context, items[index]);
+      },
+      physics: const AlwaysScrollableScrollPhysics(),
+      padding: const EdgeInsets.all(8.0),
+      shrinkWrap: true,
+      primary: false,
+    );
+  }
+
+  Widget buildGridViewBuilder<T>({
+    required List<T> items,
+    required Widget Function(BuildContext, T) itemBuilder,
+    required int itemCount,
+    int crossAxisCount = 2,
+    double childAspectRatio = 1.0,
+  }) {
+    return GridView.builder(
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: crossAxisCount,
+        childAspectRatio: childAspectRatio,
+      ),
+      itemCount: itemCount,
+      itemBuilder: (context, index) {
+        return itemBuilder(context, items[index]);
+      },
+      padding: const EdgeInsets.all(8.0),
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+    );
+  }
+
+  Widget buildTabBar({
+    required List<Tab> tabs,
+    required TabController controller,
+    required Function(int) onTap,
+  }) {
+    return TabBar(
+      controller: controller,
+      tabs: tabs,
+      onTap: onTap,
+      indicatorColor: AC.xMainColor,
+      labelColor: AC.xMainColor,
+      unselectedLabelColor: Colors.grey,
+    );
+  }
+
+  Widget buildTabBarView({
+    required List<Widget> children,
+    required TabController controller,
+  }) {
+    return TabBarView(
+      controller: controller,
+      children: children,
+    );
+  }
+
+  Widget buildSnackBarWithAction({
+    required String message,
+    required String actionLabel,
+    required VoidCallback onAction,
+  }) {
+    return SnackBar(
+      content: Text(message),
+      backgroundColor: AC.xMainColor,
+      duration: const Duration(seconds: 2),
+      action: SnackBarAction(
+        label: actionLabel,
+        textColor: Colors.white,
+        onPressed: onAction,
+      ),
+    );
+  }
 }
 
+''';
 
+String _appErrorWidget(String projectName) => '''
+import 'package:flutter/material.dart';
+
+class AppErrorWidget extends StatelessWidget {
+  final String message;
+
+  const AppErrorWidget({
+    super.key,
+    this.message = "Something went wrong",
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24.0),
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.error_outline, color: Colors.red, size: 60),
+              const SizedBox(height: 16),
+              Text(
+                message,
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    color: Colors.red.shade700, fontWeight: FontWeight.w600),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 20),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+''';
+
+String _appValidationUtilsCode(String projectName) => '''
+//Please consider removing the backslash \ before each dollar sign \$
+class AppUtils {
+  static bool hasLowerCase(String password) {
+    return RegExp(r'^(?=.*[a-z])').hasMatch(password);
+  }
+
+  static bool hasUpperCase(String password) {
+    return RegExp(r'^(?=.*[A-Z])').hasMatch(password);
+  }
+
+  static bool hasNumber(String password) {
+    return RegExp(r'^(?=.*?[0-9])').hasMatch(password);
+  }
+
+  static bool hasMinLength(String password) {
+    return RegExp(r'^(?=.{3,})').hasMatch(password);
+  }
+
+  static bool hasSpecialCharacter(String password) {
+    return RegExp(r'^(?=.*?[#?!@\$%^&*-])').hasMatch(password);
+  }
+
+  static bool isPasswordValid(String password) {
+    return hasLowerCase(password) &&
+        hasUpperCase(password) &&
+        hasNumber(password) &&
+        hasMinLength(password) &&
+        hasSpecialCharacter(password);
+  }
+
+  static bool isNameValid(String name) {
+    return RegExp(r'^[a-zA-Z\s]{2,}\$').hasMatch(name);
+  }
+
+  static bool isSurnameValid(String surname) {
+    return RegExp(r'^[a-zA-Z\s]{2,}\$').hasMatch(surname);
+  }
+
+  static bool isFullNameValid(String fullName) {
+    return RegExp(r'^[a-zA-Z\s]{2,}\$').hasMatch(fullName);
+  }
+
+  static bool isNicknameValid(String nickname) {
+    return RegExp(r'^[a-zA-Z0-9_]{3,}\$').hasMatch(nickname);
+  }
+
+  static bool isPasswordMatch(String password, String confirmPassword) {
+    return password == confirmPassword;
+  }
+
+  static bool isAgeEmpty(String age) {
+    return age.isEmpty;
+  }
+
+  static bool isAgeValid(String age) {
+    return RegExp(r'^(1[89]|[2-9][0-9]|1[01][0-9]|120)\$').hasMatch(age);
+  }
+
+  static bool isUsernameValid(String username) {
+    return RegExp(r'^[a-zA-Z0-9_]{3,}\$').hasMatch(username);
+  }
+
+  static bool isEmailValid(String email) {
+    return RegExp(r'^[^@]+@[^@]+.[^@]+').hasMatch(email);
+  }
+
+  static bool isEmailDomainValid(String email, String domain) {
+    return RegExp(r'^[^@]+@' + RegExp.escape(domain) + r'\$').hasMatch(email);
+  }
+
+  static bool isPhoneNumberValid(String phoneNumber) {
+    return RegExp(r'^\+?[0-9]{10,15}\$').hasMatch(phoneNumber);
+  }
+
+  static bool isUrlValid(String url) {
+    return RegExp(
+      r'^(https?|ftp):\/\/[^\s/\$.?#].[^\s]*\$',
+      caseSensitive: false,
+    ).hasMatch(url);
+  }
+
+  static bool isDateValid(String date) {
+    return RegExp(
+      r'^(0[1-9]|[12][0-9]|3[01])-(0[1-9]|1[0-2])-(\d{4})\$',
+      caseSensitive: false,
+    ).hasMatch(date);
+  }
+
+  static bool isTimeValid(String time) {
+    return RegExp(
+      r'^(0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]\$',
+      caseSensitive: false,
+    ).hasMatch(time);
+  }
+
+  static bool isDateTimeValid(String dateTime) {
+    return RegExp(
+      r'^(0[1-9]|[12][0-9]|3[01])-(0[1-9]|1[0-2])-(\d{4}) (0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]\$',
+      caseSensitive: false,
+    ).hasMatch(dateTime);
+  }
+
+  static bool isPostalCodeValid(String postalCode) {
+    return RegExp(
+      r'^\d{5}(-\d{4})?\$',
+      caseSensitive: false,
+    ).hasMatch(postalCode);
+  }
+
+  static bool isCreditCardValid(String creditCard) {
+    return RegExp(
+      r'^(?:4[0-9]{12}(?:[0-9]{3})?|5[1-5][0-9]{14}|6(?:011|5[0-9][0-9])[0-9]{12}|3[47][0-9]{13}|3(?:0[0-5]|[68][0-9])[0-9]{11}|(?:2131|1800|35\d{3})\d{11})\$',
+      caseSensitive: false,
+    ).hasMatch(creditCard);
+  }
+
+  static bool isHexColorValid(String hexColor) {
+    return RegExp(
+      r'^#?([0-9a-fA-F]{6}|[0-9a-fA-F]{3})\$',
+      caseSensitive: false,
+    ).hasMatch(hexColor);
+  }
+
+  static bool isIpAddressValid(String ipAddress) {
+    return RegExp(
+      r'^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\$',
+      caseSensitive: false,
+    ).hasMatch(ipAddress);
+  }
+
+  static bool isMacAddressValid(String macAddress) {
+    return RegExp(
+      r'^([0-9a-fA-F]{2}[:-]){5}([0-9a-fA-F]{2})\$',
+      caseSensitive: false,
+    ).hasMatch(macAddress);
+  }
+
+  static bool isUuidValid(String uuid) {
+    return RegExp(
+      r'^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}\$',
+      caseSensitive: false,
+    ).hasMatch(uuid);
+  }
+}
 ''';
 
 String _appPrefsCode(String projectName) => '''
@@ -953,6 +1958,28 @@ class AppPreferences {
 }
 ''';
 
+String _appSecureStorage(String projectName) => '''
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+
+class SecureStorageService {
+  static final _storage = FlutterSecureStorage();
+
+  static const _keyAccessToken = 'access_token';
+
+  Future<void> saveAccessToken(String token) async {
+    await _storage.write(key: _keyAccessToken, value: token);
+  }
+
+  Future<String?> getAccessToken() async {
+    return await _storage.read(key: _keyAccessToken);
+  }
+
+  Future<void> clearAccessToken() async {
+    await _storage.delete(key: _keyAccessToken);
+  }
+}
+''';
+
 String _appOfflineBuilderCode(String projectName) => '''
 import 'package:flutter/material.dart';
 import 'package:flutter_offline/flutter_offline.dart';
@@ -983,12 +2010,32 @@ class AppOfflineBuilder extends StatelessWidget {
                   right: 0,
                   child: Container(
                     color: Colors.red,
-                    padding: const EdgeInsets.all(12),
-                    child: const Text(
-                      'No Internet Connection',
-                      style: TextStyle(color: Colors.white),
-                      textAlign: TextAlign.center,
-                    ),
+                    padding: const EdgeInsets.all(20),
+                    child: Row(children: [
+                      const Icon(Icons.signal_wifi_off,
+                          color: Colors.white, size: 45),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'No Internet Connection',
+                              style:
+                                  TextStyle(color: Colors.white, fontSize: 22),
+                              textAlign: TextAlign.center,
+                            ),
+                            Text(
+                              'Please check your connection and try again.',
+                              style:
+                                  TextStyle(color: Colors.white, fontSize: 14),
+                              textAlign: TextAlign.center,
+                              softWrap: true,
+                            )
+                          ],
+                        ),
+                      ),
+                    ]),
                   ),
                 )
             ],
@@ -1001,22 +2048,279 @@ class AppOfflineBuilder extends StatelessWidget {
 }
  ''';
 
+String _appNotificationStorage(String projectName) => '''
+import 'dart:ui';
+
+import 'package:$projectName/core/general_layer/utils/app_shared_preferences.dart';
+import 'dart:convert';
+
+import 'package:get_it/get_it.dart';
+
+class NotificationStore {
+  static final NotificationStore _instance = NotificationStore._internal();
+
+  factory NotificationStore() => _instance;
+
+  NotificationStore._internal();
+
+  final List<Map<String, dynamic>> _notifications = [];
+
+  final prefs = GetIt.instance<AppPreferences>();
+
+  Future<void> loadNotifications() async {
+    final data = prefs.getData('notifications');
+    if (data != null) {
+      final List decoded = jsonDecode(data);
+      _notifications.clear();
+      _notifications.addAll(decoded.cast<Map<String, dynamic>>());
+    }
+  }
+
+  Future<void> saveNotifications() async {
+    await prefs.setData('notifications', jsonEncode(_notifications));
+  }
+
+  Future<void> addNotification(Map<String, dynamic> notification) async {
+    _notifications.insert(0, notification);
+    await saveNotifications();
+    for (var listener in _listeners) {
+      listener();
+    }
+  }
+
+  List<Map<String, dynamic>> get notifications =>
+      List.unmodifiable(_notifications);
+
+  final List<VoidCallback> _listeners = [];
+
+  void addListener(VoidCallback listener) {
+    _listeners.add(listener);
+  }
+
+  void removeListener(VoidCallback listener) {
+    _listeners.remove(listener);
+  }
+}
+''';
+
+String _appNetWorkStorage(String projectName) => '''
+import 'dart:convert';
+
+import 'package:$projectName/core/data_layer/models/const_models/offline_queue_model.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+class LocalStorageService {
+  static const String _key = 'offline_requests';
+
+  static Future<void> saveRequests(List<OfflineRequest> requests) async {
+    final prefs = await SharedPreferences.getInstance();
+    final encoded = jsonEncode(requests.map((e) => e.toJson()).toList());
+    await prefs.setString(_key, encoded);
+  }
+
+  static Future<List<OfflineRequest>> loadRequests() async {
+    final prefs = await SharedPreferences.getInstance();
+    final encoded = prefs.getString(_key);
+    if (encoded == null) return [];
+    final List<dynamic> decoded = jsonDecode(encoded);
+    return decoded.map((e) => OfflineRequest.fromJson(e)).toList();
+  }
+}
+
+''';
+
+String _appLoggerUtility(String projectName) => '''
+import 'package:flutter/foundation.dart';
+
+enum Logger {
+  black("30"),
+  red("31"),
+  green("32"),
+  yellow("33"),
+  blue("34"),
+  magenta("35"),
+  cyan("36"),
+  white("37");
+
+  final String code;
+
+  const Logger(this.code);
+
+  void log(dynamic text) => debugPrint('\x1B[\${code}m\$text\x1B[0m');
+}
+''';
+
+String _appLocationServiceCode(String projectName) => '''
+import 'dart:async';
+
+import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:get/get.dart';
+import 'package:permission_handler/permission_handler.dart';
+
+class LocationService {
+  static final LocationService _instance = LocationService._internal();
+
+  factory LocationService() => _instance;
+
+  LocationService._internal();
+
+  StreamSubscription<Position>? _positionStreamSubscription;
+  final StreamController<Position> _positionController =
+      StreamController.broadcast();
+
+  Stream<Position> get positionStream => _positionController.stream;
+  static String gpsLocation = '';
+
+  Future<bool> initialize() async {
+    final permission = await _checkAndRequestPermission();
+    if (!permission) return false;
+
+    final enabled = await Geolocator.isLocationServiceEnabled();
+    if (!enabled) {
+      return false;
+    }
+
+    return true;
+  }
+
+  Future<String?> getCurrentPosition(
+      {LocationAccuracy accuracy = LocationAccuracy.high}) async {
+    bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+
+    if (!serviceEnabled) {
+      Get.dialog(AlertDialog(
+        title: const Text("Location Services Disabled"),
+        content:
+            const Text("Please enable location services to use this feature."),
+        actions: [
+          TextButton(
+            onPressed: () async {
+              Get.back();
+              await Geolocator.openLocationSettings();
+
+              serviceEnabled = await Geolocator.isLocationServiceEnabled();
+              if (!serviceEnabled) {
+                if (kDebugMode) {
+                  print("Location services still disabled.");
+                }
+                return;
+              }
+            },
+            child: const Text("Go to Settings"),
+          ),
+        ],
+      ));
+    }
+
+    LocationPermission permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied ||
+        permission == LocationPermission.deniedForever) {
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied ||
+          permission == LocationPermission.deniedForever) {
+        if (kDebugMode) {
+          print("Location permission denied.");
+        }
+        return null;
+      }
+    }
+
+    try {
+      Position position = await Geolocator.getCurrentPosition(
+        locationSettings: AndroidSettings(
+          accuracy: accuracy,
+          forceLocationManager: true,
+          intervalDuration: const Duration(seconds: 10),
+          distanceFilter: 10,
+        ),
+      );
+
+      gpsLocation = '\${position.latitude}, \${position.longitude}';
+      return gpsLocation;
+    } catch (e) {
+      if (kDebugMode) {
+        print("Error getting current position: \$e");
+      }
+      return null;
+    }
+  }
+
+  void startListening({
+    LocationAccuracy accuracy = LocationAccuracy.high,
+    int distanceFilter = 10,
+  }) async {
+    final hasPermission = await initialize();
+    if (!hasPermission) return;
+
+    _positionStreamSubscription?.cancel();
+    _positionStreamSubscription = Geolocator.getPositionStream(
+      locationSettings: LocationSettings(
+        accuracy: accuracy,
+        distanceFilter: distanceFilter,
+      ),
+    ).listen((Position position) {
+      _positionController.add(position);
+    });
+  }
+
+  void stopListening() {
+    _positionStreamSubscription?.cancel();
+    _positionStreamSubscription = null;
+  }
+
+  void dispose() {
+    stopListening();
+    _positionController.close();
+  }
+
+  Future<bool> _checkAndRequestPermission() async {
+    var permission = await Permission.location.status;
+    if (permission.isGranted) return true;
+
+    final result = await Permission.location.request();
+    return result.isGranted;
+  }
+}
+
+''';
+
 String _appEnvSettingsCode(String projectName) => '''
+import 'package:$projectName/core/general_layer/methods/general_methods.dart';
+import 'package:$projectName/core/general_layer/utils/app_location_service.dart';
+import 'package:$projectName/core/general_layer/utils/app_shared_preferences.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:get_it/get_it.dart';
 
 class Environment {
+  // to use these instances , you must register them in your service locator (GetIt) first
+  final appPref = GetIt.instance<AppPreferences>();
+  final locationService = GetIt.instance<LocationService>();
+  GeneralMethods generalMethods = GeneralMethods();
+
   static String get fileName {
     return kReleaseMode ? '.env' : '.env';
   }
 
-  static Future<void> load() async {
+  Future<void> load() async {
+  // Uncomment the following lines if you want to initialize app preferences and location service
+    // await appPref.init();
+    // await locationService.initialize();
+
     try {
       await dotenv.load(fileName: fileName);
     } catch (e) {
-      throw Exception('Failed to load and encrypt environment variables: e');
+      generalMethods.systemLogError(
+          'Failed to load and encrypt environment variables:', e);
+      if (!kReleaseMode) {
+        throw Exception('Failed to load and encrypt environment variables: e');
+      }
     }
   }
+
+  static String get apiKey => dotenv.env['API_KEY'] ?? '';
 }
  ''';
 
@@ -1057,6 +2361,112 @@ class LocaleService {
  }
 }
 
+
+''';
+
+String _timerServiceCode(String projectName) => '''
+import 'dart:async';
+import 'dart:ui';
+
+class TimerService {
+  Timer? _timer;
+
+  void start(int seconds, VoidCallback onTrigger) {
+    _timer?.cancel();
+    _timer = Timer(Duration(seconds: seconds), () {
+      onTrigger();
+      start(seconds, onTrigger);
+    });
+  }
+
+  void stop() => _timer?.cancel();
+}
+''';
+
+String _netWorkServiceCode(String projectName) => '''
+import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:$projectName/core/data_layer/models/const_models/offline_queue_model.dart';
+import 'package:$projectName/core/data_layer/network/api_consumer.dart';
+import 'package:$projectName/core/general_layer/utils/app_network_storage.dart';
+import 'package:flutter/foundation.dart';
+import 'package:get_it/get_it.dart';
+
+class NetworkRequestQueueService {
+  static final NetworkRequestQueueService _instance =
+      NetworkRequestQueueService._internal();
+
+  factory NetworkRequestQueueService() => _instance;
+
+  final realApiConsumer = GetIt.instance<ApiConsumer>();
+
+  final List<OfflineRequest> _queue = [];
+  bool _isRunning = false;
+
+  NetworkRequestQueueService._internal() {
+    _init();
+  }
+
+  Future<void> _init() async {
+    _queue.addAll(await LocalStorageService.loadRequests());
+    Connectivity().onConnectivityChanged.listen((result) {
+      if (!result.contains(ConnectivityResult.none)) {
+        _processQueue();
+      }
+    });
+    _processQueue();
+  }
+
+  Future<void> addRequest(OfflineRequest request) async {
+    _queue.add(request);
+    await _persist();
+    _processQueue();
+  }
+
+  Future<void> _persist() async {
+    await LocalStorageService.saveRequests(_queue);
+  }
+
+  Future<void> _processQueue() async {
+    if (_isRunning) return;
+    _isRunning = true;
+
+    while (_queue.isNotEmpty) {
+      final request = _queue.first;
+
+      try {
+        await _performRequest(request);
+        _queue.removeAt(0);
+        await _persist();
+      } catch (e) {
+        break;
+      }
+    }
+
+    _isRunning = false;
+  }
+
+  Future<void> _performRequest(OfflineRequest request) async {
+    switch (request.method) {
+      case 'GET':
+        await realApiConsumer.get(request.path,
+            queryParameters: request.queryParameters);
+        break;
+      case 'POST':
+        await realApiConsumer.post(request.path, body: request.body);
+        break;
+      case 'PUT':
+        await realApiConsumer.put(request.path, body: request.body);
+        break;
+      case 'DELETE':
+        await realApiConsumer.delete(request.path);
+        break;
+      default:
+        if (!kReleaseMode) {
+          throw Exception("Unknown method \${request.method}");
+        }
+    }
+  }
+}
 
 ''';
 
@@ -1288,6 +2698,33 @@ double get screenHeight => 1.sh;
 
 ''';
 
+String _loginRepository(String projectName) => '''
+// import 'package:dartz/dartz.dart';
+// import 'package:$projectName/core/business_layer/bloc/login/login_bloc.dart';
+// import 'package:$projectName/core/data_layer/errors/failures.dart';
+// import 'package:$projectName/core/data_layer/models/appuser/appuser_model.dart';
+// import 'package:$projectName/core/data_layer/network/queue_consumer.dart';
+// import 'package:$projectName/core/data_layer/repository/base/base_repository.dart';
+//
+// class LoginRepository extends BaseRepository {
+//   final QueueApiConsumer apiConsumer;
+//
+//   LoginRepository({required this.apiConsumer});
+//
+//   Future<Either<Failure, AppUserModel>> userLogin(UserLoginEvent event) {
+//     return guardApiCall(() async {
+//       final response = await apiConsumer.post('AppUser/login', body: {
+//         "companyCode": event.companyId,
+//         "paswword": event.password,
+//         "userName": event.username,
+//         "token": event.token
+//       });
+//       return AppUserModel.fromJson(response);
+//     });
+//   }
+// }
+ ''';
+
 String _baseRepositoryCode(String projectName) => '''
 import 'package:dartz/dartz.dart';
 import 'package:$projectName/core/data_layer/errors/exceptions.dart';
@@ -1302,179 +2739,63 @@ abstract class BaseRepository {
     } on AppException catch (e) {
       return Left(ServerFailure(e.message, e.statusCode));
     } catch (e) {
-      return Left(ServerFailure('Unexpected Error'));
+      return Left(ServerFailure('Unexpected Error : \$e - \${e.runtimeType}'));
     }
   }
 }
 ''';
 
-String _categoryModelCode(String projectName) => '''
-class MainService {
-  List<MainServiceData>? data;
-  String? message;
-  bool? isSuccess;
+String _generalMethodsCode(String projectName) => '''
+import 'package:$projectName/core/general_layer/utils/app_logger_utility.dart';
+import 'package:flutter/services.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:platform_device_id_plus/platform_device_id.dart';
 
-  MainService({this.data, this.message, this.isSuccess});
+class GeneralMethods {
+  static const platform = MethodChannel('packageName/channelName');
 
-  MainService.fromJson(Map<String, dynamic> json) {
-    if (json['data'] != null) {
-      data = <MainServiceData>[];
-      json['data'].forEach((v) {
-        data!.add(MainServiceData.fromJson(v));
-      });
+  Future<void> invokeNative(
+    String method, {
+    Map<String, dynamic>? arguments,
+  }) async {
+    try {
+      await platform.invokeMethod(method, arguments);
+    } catch (e) {
+      systemLogError('Error invoking native method \$method: ', e);
     }
-    message = json['message'];
-    isSuccess = json['isSucess'];
   }
 
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = <String, dynamic>{};
-    if (this.data != null) {
-      data['data'] = this.data!.map((v) => v.toJson()).toList();
-    }
-    data['message'] = message;
-    data['isSucess'] = isSuccess;
-    return data;
-  }
-}
-
-class MainServiceData {
-  String? descAr;
-  String? descOt;
-  String? icon;
-  int? activeForUserAdd;
-  int? activeForAppDisplay;
-  int? sortOrder;
-  List<MainSubServiceMappings>? mainSubServiceMappings;
-  String? id;
-  String? createdBy;
-  String? createdDate;
-  String? modifiedBy;
-  String? modifiedDate;
-
-  MainServiceData(
-      {this.descAr,
-      this.descOt,
-      this.icon,
-      this.activeForUserAdd,
-      this.activeForAppDisplay,
-      this.sortOrder,
-      this.mainSubServiceMappings,
-      this.id,
-      this.createdBy,
-      this.createdDate,
-      this.modifiedBy,
-      this.modifiedDate});
-
-  MainServiceData.fromJson(Map<String, dynamic> json) {
-    descAr = json['descAr'];
-    descOt = json['descOt'];
-    icon = json['icon'];
-    activeForUserAdd = json['activeForUserAdd'];
-    activeForAppDisplay = json['activeForAppDisplay'];
-    sortOrder = json['sortOrder'];
-    if (json['mainSubServiceMappings'] != null) {
-      mainSubServiceMappings = <MainSubServiceMappings>[];
-      json['mainSubServiceMappings'].forEach((v) {
-        mainSubServiceMappings!.add(MainSubServiceMappings.fromJson(v));
-      });
-    }
-    id = json['id'];
-    createdBy = json['createdBy'];
-    createdDate = json['createdDate'];
-    modifiedBy = json['modifiedBy'];
-    modifiedDate = json['modifiedDate'];
+  void systemLogWarning(String message) {
+    Logger.yellow.log('📙 [MDM] [Warning] \$message');
   }
 
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = <String, dynamic>{};
-    data['descAr'] = descAr;
-    data['descOt'] = descOt;
-    data['icon'] = icon;
-    data['activeForUserAdd'] = activeForUserAdd;
-    data['activeForAppDisplay'] = activeForAppDisplay;
-    data['sortOrder'] = sortOrder;
-    if (mainSubServiceMappings != null) {
-      data['mainSubServiceMappings'] =
-          mainSubServiceMappings!.map((v) => v.toJson()).toList();
-    }
-    data['id'] = id;
-    data['createdBy'] = createdBy;
-    data['createdDate'] = createdDate;
-    data['modifiedBy'] = modifiedBy;
-    data['modifiedDate'] = modifiedDate;
-    return data;
-  }
-}
-
-class MainSubServiceMappings {
-  String? mainServiceId;
-  String? mainServiceName;
-  String? subServiceId;
-  String? subServiceName;
-  String? id;
-  String? createdBy;
-  String? createdDate;
-  Null modifiedBy;
-  Null modifiedDate;
-
-  MainSubServiceMappings(
-      {this.mainServiceId,
-      this.mainServiceName,
-      this.subServiceId,
-      this.subServiceName,
-      this.id,
-      this.createdBy,
-      this.createdDate,
-      this.modifiedBy,
-      this.modifiedDate});
-
-  MainSubServiceMappings.fromJson(Map<String, dynamic> json) {
-    mainServiceId = json['mainServiceId'];
-    mainServiceName = json['mainServiceName'];
-    subServiceId = json['subServiceId'];
-    subServiceName = json['subServiceName'];
-    id = json['id'];
-    createdBy = json['createdBy'];
-    createdDate = json['createdDate'];
-    modifiedBy = json['modifiedBy'];
-    modifiedDate = json['modifiedDate'];
+  void systemLogInfo(String message) {
+    Logger.green.log('📗 [MDM] [INFO] \$message');
   }
 
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = <String, dynamic>{};
-    data['mainServiceId'] = mainServiceId;
-    data['mainServiceName'] = mainServiceName;
-    data['subServiceId'] = subServiceId;
-    data['subServiceName'] = subServiceName;
-    data['id'] = id;
-    data['createdBy'] = createdBy;
-    data['createdDate'] = createdDate;
-    data['modifiedBy'] = modifiedBy;
-    data['modifiedDate'] = modifiedDate;
-    return data;
+  void systemLogError(String context, Object e) {
+    Logger.red.log('📕 [MDM] [ERROR] [\$context]: \$e');
   }
-}
- ''';
 
-String _categoryRepositoryCode(String projectName) => '''
-//This is just a sample repository for categories
-import 'package:dartz/dartz.dart';
-import 'package:$projectName/core/data_layer/errors/failures.dart';
-import 'package:$projectName/core/data_layer/models/category/category_model.dart';
-import 'package:$projectName/core/data_layer/network/api_consumer.dart';
-import 'package:$projectName/core/data_layer/repository/base/base_repository.dart';
+  void systemLogAction(String context, Object e) {
+    Logger.blue.log('📘 [MDM] [Action] [\$context]: \$e');
+  }
 
-class CategoryRepository extends BaseRepository {
-  final ApiConsumer apiConsumer;
 
-  CategoryRepository({required this.apiConsumer});
+ String formatPosition(Position position) {
+ return ''
+ Lat: \${position.latitude}
+ Long: \${position.longitude}
+ Accuracy: \${position.accuracy}m
+ Speed: \${position.speed} m/s
+ Bearing: \${position.heading}°
+ Timestamp: \${position.timestamp}
+ '';
+   }
 
-  Future<Either<Failure, MainService>> getAllCategories() {
-    return guardApiCall(() async {
-      final response = await apiConsumer.get('MainService/all');
-      return MainService.fromJson(response);
-    });
+  Future<String?> getAndroidId() async {
+    String? deviceId = await PlatformDeviceId.getDeviceId;
+    return deviceId;
   }
 }
 ''';
@@ -1637,9 +2958,12 @@ ColorScheme get colorScheme => Theme.of(this).colorScheme;
 
 String _splashScreenCode(projectName) => '''
 import 'dart:async';
-import 'package:$projectName/core/general_layer/extensions/navigation_extensions.dart';
-import 'package:$projectName/core/general_layer/routing/routes.dart';
 import 'package:flutter/material.dart';
+import 'package:$projectName/core/general_layer/constants/app_constants.dart';
+import 'package:$projectName/core/general_layer/extensions/navigation_extensions.dart';
+import 'package:$projectName/core/general_layer/routing/app_routes_list.dart';
+import 'package:$projectName/generated/assets.dart';
+import 'package:rs_seek/rs_seek.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -1652,77 +2976,142 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
-    Timer(const Duration(seconds: 2), () {
-      context.pushReplacementNamed(Routes.onBoardingScreen);
-    });
+    initDiService();
   }
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            FlutterLogo(size: 100),
-            SizedBox(height: 20),
-            Text('Splash Screen', style: TextStyle(fontSize: 20)),
-          ],
-        ),
-      ),
-    );
+    return Scaffold(
+        body: Center(
+            child:
+            Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+              RsAspectRatio(
+                  landscapeRatio: 2.0,
+                  portraitRatio: 1.0,
+                  child: Image.asset(Assets.imagesLogo)),
+              SizedBox(
+                  width: MediaQuery
+                      .of(context)
+                      .size
+                      .width * 0.3,
+                  child: LinearProgressIndicator(
+                      minHeight: 15,
+                      backgroundColor: AC.xOffWhite,
+                      valueColor: AlwaysStoppedAnimation<Color>(
+                          AC.xOrangeColor),
+                      borderRadius: BorderRadius.circular(25)))
+            ])));
+  }
+
+  Future<void> initDiService() async {
+    await Future.delayed(Duration(milliseconds: 700));
+    context.pushReplacementNamed(Routes.initializerScreen);
   }
 }
 ''';
 
-String _categoryStateCode(String projectName) => '''
-part of 'category_cubit.dart';
+String _appInitializerCode(String projectName) => '''
+import 'dart:convert';
 
-sealed class CategoryState {}
-
-final class CategoryInitial extends CategoryState {}
-
-class CategoryLoading extends CategoryState {}
-
-class CategoryLoaded extends CategoryState {
-  final MainService data;
-
-  CategoryLoaded(this.data);
-}
-
-class CategoryError extends CategoryState {
-  final String message;
-
-  CategoryError(this.message);
-}
-
-''';
-
-String _categoryCubitCode(String projectName) => '''
-import 'package:dartz/dartz.dart';
-import 'package:$projectName/core/data_layer/errors/failures.dart';
-import 'package:$projectName/core/data_layer/models/category/category_model.dart';
-import 'package:$projectName/core/data_layer/repository/category/category_repository.dart';
+import 'package:after_layout/after_layout.dart';
+import 'package:$projectName/core/general_layer/constants/app_constants.dart';
+import 'package:$projectName/core/general_layer/extensions/navigation_extensions.dart';
+import 'package:$projectName/core/general_layer/methods/general_methods.dart';
+import 'package:$projectName/core/general_layer/routing/app_routes_list.dart';
+import 'package:$projectName/core/general_layer/services/foreground_location_service.dart';
+import 'package:$projectName/core/general_layer/utils/app_shared_preferences.dart';
+import 'package:$projectName/core/general_layer/widgets/app_general_widgets.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:get_it/get_it.dart';
+import 'package:rs_seek/rs_seek.dart';
 
-part 'category_state.dart';
+class AppInitializer extends StatefulWidget {
+  const AppInitializer({super.key});
 
-class CategoryCubit extends Cubit<CategoryState> {
-  final CategoryRepository categoryRepository;
+  @override
+  State<AppInitializer> createState() => _AppInitializerState();
+}
 
-  CategoryCubit(this.categoryRepository) : super(CategoryInitial());
+class _AppInitializerState extends State<AppInitializer>
+    with AfterLayoutMixin<AppInitializer> {
+  late final ForegroundLocationService _locationService;
+  late final AppPreferences _appPrefs;
+  late final GeneralMethods _gmd;
+  late final GeneralWidgets _gw;
 
-  Future<void> getAllCategories() async {
-    emit(CategoryLoading());
-    final Either<Failure, MainService> result =
-        await categoryRepository.getAllCategories();
+  @override
+  void initState() {
+    super.initState();
+    _initializeApp();
+  }
 
-    result.fold(
-      (failure) => emit(CategoryError(failure.message)),
-      (data) => emit(CategoryLoaded(data)),
+  @override
+  Future<void> afterFirstLayout(BuildContext context) async {
+    final userInfo = _appPrefs.getData('user_info');
+    await Future.delayed(const Duration(milliseconds: 200));
+
+    if (userInfo != null) {
+      _navigateToNextScreen();
+    } else {
+     _navigateToNextScreen();
+  }
+
+  OutlineInputBorder _buildOutlineInputBorder() {
+    return OutlineInputBorder(
+      borderSide: const BorderSide(color: AC.xMainColor, width: 1.5),
+      borderRadius: BorderRadius.circular(8),
     );
   }
+
+  Future<void> _initializeApp() async {
+    _appPrefs = GetIt.instance<AppPreferences>();
+    _locationService = GetIt.instance<ForegroundLocationService>();
+    _gmd = GetIt.instance<GeneralMethods>();
+    _gw = GetIt.instance<GeneralWidgets>();
+    // you can uncomment the next lines if you want to use location services and fetch device ID
+    // await Future.wait([
+    //   _startLocationService(),
+    //   _getDeviceId(),
+    // ]);
+  }
+
+  Future<void> _startLocationService() async {
+    _locationService.start();
+  }
+
+  void _navigateToNextScreen() async {
+    final userInfo = _appPrefs.getData('user_info');
+
+    if (userInfo != null) {
+      if (!mounted) return;
+      context.pushReplacementNamed(Routes.notificationInboxScreen);
+    } else {
+      if (!mounted) return;
+      context.pushReplacementNamed(Routes.initializerScreen);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+        body: Center(
+            child: SizedBox(
+                width: MediaQuery.of(context).size.width * 0.3,
+                child: LinearProgressIndicator(
+                    minHeight: 15,
+                    backgroundColor: AC.xOffWhite,
+                    valueColor: AlwaysStoppedAnimation<Color>(AC.xOrangeColor),
+                    borderRadius: BorderRadius.circular(25)))));
+  }
+
+  Future<void> _getDeviceId() async {
+    final id = await _gmd.getAndroidId();
+    _gmd.systemLogAction('[Device ID] ',id);
+    AC.deviceId = id ?? 'no device id';
+  }
 }
+
 ''';
 
 String _localeCubitCode(String projectName) => '''
@@ -1752,28 +3141,6 @@ class LocaleCubit extends Cubit<LocaleState> {
 }
 
 
-''';
-
-String _loginCubitCode(String projectName) => '''
-import 'package:flutter_bloc/flutter_bloc.dart';
-
-part 'login_state.dart';
-
-class LoginCubit extends Cubit<LoginState> {
-  LoginCubit() : super(LoginInitial());
-
-  Future<void> loginUser(String username, String password) async {
-    emit(LoginLoading());
-
-    await Future.delayed(const Duration(seconds: 2));
-
-    if (username == 'Admin' && password == '123') {
-      emit(LoginSuccessful('Login has been successful'));
-    } else {
-      emit(LoginError('Wrong credentials'));
-    }
-  }
-}
 ''';
 
 String _loginEventCode(String projectName) => '''
@@ -1845,28 +3212,6 @@ final class LoginError extends LoginState {
 }
 ''';
 
-String _loginCubitStateCode(String projectName) => '''
-part of 'login_cubit.dart';
-
-sealed class LoginState {}
-
-final class LoginInitial extends LoginState {}
-
-final class LoginLoading extends LoginState {}
-
-final class LoginSuccessful extends LoginState {
-  final String msg;
-
-  LoginSuccessful(this.msg);
-}
-
-final class LoginError extends LoginState {
-  final String errorMsg;
-
-  LoginError(this.errorMsg);
-}
-''';
-
 String _themeCubitCode(String projectName) => '''
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -1897,12 +3242,9 @@ class ThemeCubit extends Cubit<ThemeState> {
 ''';
 
 String _appRouterCode(String projectName) => '''
-import 'package:$projectName/core/data_layer/models/category/category_model.dart';
-import 'package:$projectName/core/general_layer/routing/routes.dart' show Routes;
-import 'package:$projectName/features/Login/presentation/screens/login_screen.dart';
-import 'package:$projectName/features/home/presentation/screens/home_details_screen.dart';
-import 'package:$projectName/features/home/presentation/screens/home_screen.dart';
-import 'package:$projectName/features/onboarding/presentation/screens/onboarding_screen.dart';
+import 'package:$projectName/core/general_layer/routing/app_routes_list.dart';
+import 'package:$projectName/features/home/presentation/screens/notification_screen.dart';
+import 'package:$projectName/features/splash/presentation/screens/initializer_screen.dart';
 import 'package:$projectName/features/splash/presentation/screens/splash_screen.dart';
 import 'package:flutter/material.dart';
 
@@ -1912,24 +3254,18 @@ class AppRouter {
       case Routes.initialScreen:
       case Routes.splashScreen:
         return _createRoute(const SplashScreen());
-      case Routes.onBoardingScreen:
-        return _createRoute(const OnboardingScreen());
-      case Routes.homeScreen:
-        return _createRoute(const AppHomeScreen());
-      case Routes.homeDetailsScreen:
-        final item = settings.arguments as MainServiceData;
-        return _createRoute(HomeScreenDetails(category: item));
-      case Routes.loginScreen:
-        return _createRoute(LoginScreen());
-
+      case Routes.initializerScreen:
+        return _createRoute(AppInitializer());
+      case Routes.notificationInboxScreen:
+        return _createRoute(const NotificationInboxScreen());
       default:
-        return null;
+        return _createRoute(const SplashScreen());
     }
   }
 
   PageRouteBuilder _createRoute(Widget page) {
     return PageRouteBuilder(
-      transitionDuration: const Duration(milliseconds: 400),
+      transitionDuration: const Duration(milliseconds: 300),
       pageBuilder: (context, animation, secondaryAnimation) => page,
       transitionsBuilder: (context, animation, secondaryAnimation, child) {
         return FadeTransition(opacity: animation, child: child);
@@ -1937,21 +3273,30 @@ class AppRouter {
     );
   }
 }
+
 ''';
 
 String _routesCode(String projectName) => '''
 class Routes {
   static const String initialScreen = '/';
   static const String splashScreen = '/splashScreen';
-  static const String onBoardingScreen = '/onBoardingScreen';
-  static const String loginScreen = '/loginScreen';
-  static const String signupScreen = '/signupScreen';
-  static const String homeScreen = '/homeScreen';
-  static const String homeDetailsScreen = '/homeDetailsScreen';
+  static const String initializerScreen = '/initializerScreen';
+  static const String notificationInboxScreen = '/notificationInboxScreen';
+
+  static bool isValidRoute(String route) {
+    const validRoutes = [
+      '/',
+      '/splashScreen',
+      '/initializerScreen',
+      '/notificationInboxScreen'
+    ];
+    return validRoutes.contains(route);
+  }
 }
 ''';
 
 String _appThemeCode(String projectName) => '''
+import 'package:$projectName/core/general_layer/constants/app_constants.dart';
 import 'package:flutter/material.dart';
 
 import 'app_colors.dart';
@@ -1966,9 +3311,7 @@ class AppTheme {
           backgroundColor: AppColor.white,
           elevation: 0,
           centerTitle: true,
-          iconTheme: IconThemeData(color: AppColor.white),
-          titleTextStyle: TextStyle(
-              fontSize: 20, fontWeight: FontWeight.bold, color: AppColor.white),
+          foregroundColor: AC.xMainColor,
         ),
       );
 
@@ -1982,11 +3325,11 @@ class AppTheme {
           elevation: 0,
           centerTitle: true,
           iconTheme: IconThemeData(color: AppColor.white),
-          titleTextStyle: TextStyle(
-              fontSize: 20, fontWeight: FontWeight.bold, color: AppColor.white),
+          titleTextStyle: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: AppColor.white),
         ),
       );
 }
+
 ''';
 
 String _appColorsCode(String projectName) => '''
@@ -2006,7 +3349,7 @@ String _genCode(String projectName) => '''
 // import 'package:clean_gen_tool/clean_gen_tool_plus.dart';
 //
 // void main() async {
-//   await CleanGenTool.generate();
+//   await CleanGenToolPlus.generate();
 // }
  ''';
 
@@ -2018,46 +3361,39 @@ import 'package:$projectName/core/business_layer/cubit/category/category_cubit.d
 import 'package:$projectName/core/business_layer/cubit/locale/locale_cubit.dart';
 import 'package:$projectName/core/business_layer/cubit/theme/theme_cubit.dart';
 import 'package:$projectName/core/data_layer/network/dio_consumer.dart';
-import 'package:$projectName/core/data_layer/repository/category/category_repository.dart';
 import 'package:$projectName/core/general_layer/routing/app_router.dart';
 import 'package:$projectName/core/general_layer/utils/app_env_settings.dart';
-import 'package:$projectName/core/general_layer/utils/app_shared_preferences.dart';
+import 'package:$projectName/core/general_layer/utils/app_shared_preferences.dart';.
+import 'package:$projectName/core/general_layer/widgets/app_error_widget.dart';
+import 'package:$projectName/core/di_layer/di_service_layer.dart';
+import 'package:$projectName/core/general_layer/constants/app_constants.dart';
+import 'package:get_it/get_it.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'app.dart';
 import 'app_bloc_observer.dart';
-import 'package:$projectName/core/general_layer/constants/app_constants.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await EasyLocalization.ensureInitialized();
   Bloc.observer = AppBlocObserver();
-  await AppPreferences().init();
-  await Environment.load();
+  ErrorWidget.builder = (errorDetails) =>
+  AppErrorWidget(message: errorDetails.exception.toString());
+  
+  await ServiceLocator.setup().then((value) => runApp(_buildApp()));
+}
 
-  runApp(EasyLocalization(
-    supportedLocales: AC.supportedLocales,
-    path: 'assets/lang',
-    fallbackLocale: const Locale('en'),
-    child: MultiBlocProvider(
-      providers: [
+Widget _buildApp() {
+  return EasyLocalization(
+      supportedLocales: AC.supportedLocales,
+      path: 'assets/lang',
+      fallbackLocale: const Locale('en'),
+      child: MultiBlocProvider(providers: [
         BlocProvider(create: (_) => LocaleCubit()),
         BlocProvider(create: (_) => ThemeCubit()),
         BlocProvider(create: (_) => LoginBloc()),
-        BlocProvider(
-          create: (context) {
-            final dio = Dio();
-            final apiConsumer = DioConsumer(client: dio);
-            final categoryRepository =
-                CategoryRepository(apiConsumer: apiConsumer);
-            return CategoryCubit(categoryRepository);
-          },
-        ),
-      ],
-      child: MyApp(appRouter: AppRouter()),
-    ),
-  ));
+      ], child: MyApp(appRouter:  AppRouter())));
 }
 ''';
 
@@ -2087,6 +3423,7 @@ class MyApp extends StatelessWidget {
         splitScreenMode: true,
         child: MaterialApp(
           debugShowCheckedModeBanner: false,
+          navigatorKey: AC.navigatorKey,
           title: AC.appName,
           theme: AppTheme.lightTheme,
           darkTheme: AppTheme.darkTheme,
@@ -2106,251 +3443,205 @@ class MyApp extends StatelessWidget {
 
 String _blocObserverCode(String projectName) => '''
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:$projectName/core/general_layer/methods/general_methods.dart';
 
 
 class AppBlocObserver extends BlocObserver {
- @override
- void onCreate(BlocBase bloc) {
-   super.onCreate(bloc);
-   print('🔍 Bloc Created: \${bloc.runtimeType}');
- }
-
-
- @override
- void onChange(BlocBase bloc, Change change) {
-   super.onChange(bloc, change);
-   print('🔁 Bloc Change in \${bloc.runtimeType}: \$change');
- }
-
-
- @override
- void onError(BlocBase bloc, Object error, StackTrace stackTrace) {
-   print('❌ Bloc Error in \${bloc.runtimeType}: \$error');
-   super.onError(bloc, error, stackTrace);
- }
-
-
- @override
- void onClose(BlocBase bloc) {
-   print('🛑 Bloc Closed: \${bloc.runtimeType}');
-   super.onClose(bloc);
- }
-}
-''';
-
-String _homeScreenCode(String projectName) => '''
-import 'package:$projectName/core/business_layer/cubit/category/category_cubit.dart';
-import 'package:$projectName/core/data_layer/models/category/category_model.dart';
-import 'package:$projectName/core/general_layer/constants/app_constants.dart';
-import 'package:$projectName/core/general_layer/constants/endpoint_constants.dart';
-import 'package:$projectName/core/general_layer/extensions/navigation_extensions.dart';
-import 'package:$projectName/core/general_layer/routing/routes.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-
-class AppHomeScreen extends StatefulWidget {
-  const AppHomeScreen({super.key});
+  final GeneralMethods gmd = GeneralMethods();
 
   @override
-  State<AppHomeScreen> createState() => _AppHomeScreenState();
+  void onCreate(BlocBase bloc) {
+    super.onCreate(bloc);
+    gmd.systemLogAction('🔍 Bloc Created: ', bloc.runtimeType);
+  }
+
+  @override
+  void onChange(BlocBase bloc, Change change) {
+    super.onChange(bloc, change);
+    gmd.systemLogAction('🔁 Bloc Change in ', '\${bloc.runtimeType}: \$change');
+  }
+
+  @override
+  void onError(BlocBase bloc, Object error, StackTrace stackTrace) {
+    gmd.systemLogError('❌ Bloc Error in \${bloc.runtimeType}: ', error);
+    super.onError(bloc, error, stackTrace);
+  }
+
+  @override
+  void onClose(BlocBase bloc) {
+    gmd.systemLogAction('🛑 Bloc Closed: ', '\${bloc.runtimeType}');
+    super.onClose(bloc);
+  }
 }
 
-class _AppHomeScreenState extends State<AppHomeScreen> {
-  MainService? mainServices;
-  MainService? searchServices;
-  bool isSearch = false;
-  final searchController = TextEditingController();
-  final focusNode = FocusNode();
+''';
+
+String _notificationScreen(String projectName) => '''
+import 'package:$projectName/core/general_layer/constants/app_constants.dart';
+import 'package:$projectName/core/general_layer/extensions/navigation_extensions.dart';
+import 'package:$projectName/core/general_layer/methods/general_methods.dart';
+import 'package:$projectName/core/general_layer/routing/app_routes_list.dart';
+import 'package:$projectName/core/general_layer/utils/app_notification_storage.dart';
+import 'package:$projectName/core/general_layer/utils/app_shared_preferences.dart';
+import 'package:flutter/material.dart';
+import 'package:get_it/get_it.dart';
+import 'package:intl/intl.dart';
+import 'package:rs_seek/rs_seek.dart';
+
+class NotificationInboxScreen extends StatefulWidget {
+  const NotificationInboxScreen({super.key});
+
+  @override
+  State<NotificationInboxScreen> createState() =>
+      _NotificationInboxScreenState();
+}
+
+class _NotificationInboxScreenState extends State<NotificationInboxScreen> {
+  final notificationStore = GetIt.I<NotificationStore>();
+  final gmd = GetIt.I<GeneralMethods>();
+  final appPrefs = GetIt.instance<AppPreferences>();
+
+  String formatTimestamp(String? timestamp) {
+    if (timestamp == null) return '';
+    try {
+      final dateTime = DateTime.parse(timestamp);
+      return DateFormat('yyyy-MM-dd • hh:mm a').format(dateTime);
+    } catch (e) {
+      gmd.systemLogError('Something is wrong', e);
+      return 'Invalid date';
+    }
+  }
 
   @override
   void initState() {
     super.initState();
-    BlocProvider.of<CategoryCubit>(context).getAllCategories();
+    notificationStore.addListener(_onNotificationsUpdated);
+    notificationStore.loadNotifications().then((_) {
+      setState(() {});
+    });
   }
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Categories'),
-        backgroundColor: AC.xMainColor,
-        actions: [
-          isSearch
-              ? IconButton(
-                  onPressed: () {
-                    isSearch = false;
-                    searchController.clear();
-                    searchServices = null;
-                    setState(() {});
-                  },
-                  icon: const Icon(Icons.clear))
-              : IconButton(
-                  onPressed: () {
-                    isSearch = true;
-                    focusNode.requestFocus();
-                    setState(() {});
-                  },
-                  icon: const Icon(Icons.search))
-        ],
-      ),
-      body: SingleChildScrollView(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Visibility(
-              visible: isSearch,
-              child: TextFormField(
-                controller: searchController,
-                focusNode: focusNode,
-                decoration: const InputDecoration(
-                  hintText: 'Search for category',
-                  fillColor: AC.xWhite,
-                  filled: true,
-                  border: OutlineInputBorder(),
-                ),
-                onChanged: findCategory,
-              ),
-            ),
-            BlocConsumer<CategoryCubit, CategoryState>(
-              listener: (context, state) {
-                if (state is CategoryLoaded) {
-                  mainServices = state.data;
-                }
-              },
-              builder: (context, state) {
-                if (state is CategoryLoading) {
-                  return const Center(child: CircularProgressIndicator());
-                } else if (state is CategoryError) {
-                  return Center(child: Text(state.message));
-                } else if (state is CategoryLoaded) {
-                  final items =
-                      searchServices?.data ?? mainServices?.data ?? [];
-
-                  if (items.isEmpty) {
-                    return const Center(child: Text('No categories found'));
-                  }
-
-                  return GridView.builder(
-                    gridDelegate:
-                        const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 3,
-                      childAspectRatio: 2 / 3,
-                      crossAxisSpacing: 2,
-                      mainAxisSpacing: 3,
-                    ),
-                    shrinkWrap: true,
-                    padding: const EdgeInsets.symmetric(vertical: 4),
-                    itemCount: items.length,
-                    itemBuilder: (context, index) {
-                      final item = items[index];
-                      return InkWell(
-                        onTap: () {
-                          context.pushNamed(Routes.homeDetailsScreen,
-                              arguments: item);
-                        },
-                        child: GridTile(
-                          footer: Container(
-                            width: double.infinity,
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 15, vertical: 10),
-                            color: Colors.black54,
-                            alignment: Alignment.bottomCenter,
-                            child: Text(
-                              item.descOt!,
-                              style: const TextStyle(color: AC.xWhite),
-                            ),
-                          ),
-                          child: Hero(
-                            tag: item.id!,
-                            child: Container(
-                              color: AC.xMainColor,
-                              child: item.icon!.isNotEmpty
-                                  ? FadeInImage.assetNetwork(
-                                      width: double.infinity,
-                                      height: double.infinity,
-                                      color: AC.xWhite,
-                                      placeholder: 'https://placehold.co/600x400',
-                                      image: 'https://placehold.co/600x400',
-                                    )
-                                  : Image.asset('https://placehold.co/600x400'),
-                            ),
-                          ),
-                        ),
-                      );
-                    },
-                  );
-                } else {
-                  return const Center(child: CircularProgressIndicator());
-                }
-              },
-            )
-          ],
-        ),
-      ),
-    );
+  void dispose() {
+    notificationStore.removeListener(_onNotificationsUpdated);
+    super.dispose();
   }
 
-  void findCategory(String char) {
-    if (char.isNotEmpty) {
-      searchServices = MainService();
-      searchServices!.data = mainServices!.data!
-          .where((element) =>
-              element.descOt!.toLowerCase().startsWith(char.toLowerCase()))
-          .toList();
-    } else {
-      searchServices = null;
-    }
+  void _onNotificationsUpdated() {
     setState(() {});
   }
-}
- ''';
-
-String _homeDetailsScreenCode(String projectName) => '''
-import 'package:$projectName/core/data_layer/models/category/category_model.dart';
-import 'package:$projectName/core/general_layer/constants/app_constants.dart';
-import 'package:$projectName/core/general_layer/constants/endpoint_constants.dart';
-import 'package:flutter/material.dart';
-
-class HomeScreenDetails extends StatelessWidget {
-  final MainServiceData category;
-
-  const HomeScreenDetails({required this.category, super.key});
 
   @override
   Widget build(BuildContext context) {
+    final notifications = notificationStore.notifications;
+
     return Scaffold(
-      appBar: AppBar(),
-      body: Column(
-        children: [
-          Hero(
-            tag: category.id!,
-            child: Container(
-              color: AC.xMainColor,
-              child: Image.network(
-                category.icon!.isNotEmpty
-                    ? 'https://placehold.co/600x400'
-                    : 'https://placehold.co/600x400',
-                height: 400,
-                width: double.infinity,
-                color: AC.xWhite,
-                fit: BoxFit.scaleDown,
-              ),
-            ),
-          ),
-          Container(
-              width: double.infinity,
-              padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
-              color: Colors.black54,
-              alignment: Alignment.bottomCenter,
-              child: Text(
-                category.descOt!,
-                style: const TextStyle(color: AC.xWhite, fontSize: 20),
-              )),
-        ],
+      appBar: AppBar(
+        title: const Text("Notification Inbox"),
+        leading: IconButton(
+          icon: const Icon(Icons.admin_panel_settings),
+          onLongPress: () {
+            appPrefs.removeData('user_info');
+            appPrefs.removeData('notifications');
+            context.pushReplacementNamed(Routes.splashScreen);
+          },
+          onPressed: () {},
+        ),
+        centerTitle: true,
+        titleTextStyle: TextStyle(
+            fontSize: RsTypography.headline(context), color: Colors.white),
+        backgroundColor: AC.xMainColor,
+        iconTheme: const IconThemeData(color: Colors.white),
+        elevation: 0,
       ),
+      body: notifications.isEmpty
+          ? const Center(
+              child: Text(
+                "No notifications available",
+                style: TextStyle(fontSize: 18),
+              ),
+            )
+          : ListView.separated(
+              padding: const EdgeInsets.all(4),
+              itemCount: notifications.length,
+              itemBuilder: (context, index) {
+                final message = notifications[index];
+
+                final timestamp = message['timestamp'];
+                final command = message['command'] ?? 'unknown';
+                final title = message['title'] ?? 'unknown';
+                final body = message['body'] ?? 'unknown';
+                final screen = message['screen'] ?? 'unknown';
+
+                return Card(
+                  color: AC.xMainColor,
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(0)),
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          title,
+                          style: const TextStyle(
+                            fontSize: 18,
+                            color: AC.xWhite,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        Text(
+                          body,
+                          style: const TextStyle(
+                            fontSize: 14,
+                            color: AC.xWhite,
+                          ),
+                        ),
+                        if (screen != null) ...[
+                          Row(
+                            children: [
+                              const Icon(
+                                Icons.link,
+                                size: 16,
+                                color: AC.xWhite,
+                              ),
+                              const SizedBox(width: 4),
+                              Text(
+                                'Route: '+screen,
+                                style:
+                                    TextStyle(color: AC.xWhite, fontSize: 13),
+                              ),
+                            ],
+                          ),
+                        ],
+                        const SizedBox(height: 12),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(command, style: buildTextStyle()),
+                            Text(formatTimestamp(timestamp),
+                                style: buildTextStyle()),
+                          ],
+                        )
+                      ],
+                    ),
+                  ),
+                );
+              },
+              separatorBuilder: (BuildContext context, int index) {
+                return const SizedBox(height: 4);
+              },
+            ),
     );
   }
+
+  TextStyle buildTextStyle() => TextStyle(
+        color: AC.xWhite,
+        fontSize: 14,
+        fontWeight: FontWeight.bold,
+      );
 }
+
  ''';
 
 String _loginScreenCode(String projectName) => '''
@@ -2377,7 +3668,7 @@ class LoginScreen extends StatelessWidget {
             _showDialog(ctx, 'Error', state.errorMsg);
           } else if (state is LoginSuccessful) {
             _showDialog(ctx, 'Success', state.msg).then(
-              (value) => ctx.pushReplacementNamed(Routes.homeScreen),
+              (value) => ctx.pushReplacementNamed(Routes.notificationInboxScreen),
             );
           }
         },
@@ -2483,118 +3774,6 @@ class LoginScreen extends StatelessWidget {
     );
   }
 }
-''';
-
-String _onboardingScreenCode(String projectName) => '''
-import 'package:flutter/material.dart';
-
-
-import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:google_fonts/google_fonts.dart';
-
-
-class OnboardingScreen extends StatefulWidget {
- const OnboardingScreen({super.key});
-
-
- @override
- State<OnboardingScreen> createState() => _OnboardingScreenState();
-}
-
-
-class _OnboardingScreenState extends State<OnboardingScreen> {
- final controller = PageController();
- bool isLastPage = false;
-
-
- @override
- void dispose() {
-   controller.dispose();
-   super.dispose();
- }
-
-
- @override
- Widget build(BuildContext context) {
-   return Scaffold(
-     backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-     body: Padding(
-       padding: EdgeInsets.symmetric(horizontal: 24.w),
-       child: Column(
-         children: [
-           SizedBox(height: 60.h),
-           Expanded(
-             child: PageView(
-               controller: controller,
-               onPageChanged: (index) => setState(() => isLastPage = index == 2),
-               children: const [
-                 OnboardPage(title: 'Welcome', description: 'This is onboarding 1'),
-                 OnboardPage(title: 'Explore', description: 'This is onboarding 2'),
-                 OnboardPage(title: 'Start', description: 'This is onboarding 3'),
-               ],
-             ),
-           ),
-   
-           SizedBox(height: 20.h),
-           SizedBox(
-             width: double.infinity,
-             child: ElevatedButton(
-               onPressed: () {
-                 if (isLastPage) {
-                 } else {
-                   controller.nextPage(
-                     duration: const Duration(milliseconds: 500),
-                     curve: Curves.easeInOut,
-                   );
-                 }
-               },
-               child: Text(isLastPage ? 'Get Started' : 'Next'),
-             ),
-           ),
-           SizedBox(height: 40.h),
-         ],
-       ),
-     ),
-   );
- }
-}
-
-
-class OnboardPage extends StatelessWidget {
- final String title;
- final String description;
- const OnboardPage({super.key, required this.title, required this.description});
-
-
- @override
- Widget build(BuildContext context) {
-   return Padding(
-     padding: EdgeInsets.symmetric(horizontal: 24.w),
-     child: Column(
-       mainAxisAlignment: MainAxisAlignment.center,
-       children: [
-         Icon(Icons.flutter_dash, size: 120.r),
-         SizedBox(height: 20.h),
-         Text(
-           title,
-           style: GoogleFonts.nunito(
-             fontSize: 26.sp,
-             fontWeight: FontWeight.bold,
-           ),
-         ),
-         SizedBox(height: 12.h),
-         Text(
-           description,
-           textAlign: TextAlign.center,
-           style: GoogleFonts.nunito(fontSize: 16.sp),
-         ),
-       ],
-     ),
-   );
- }
-}
-
-
 ''';
 
 String _themeStateCode(String projectName) => '''

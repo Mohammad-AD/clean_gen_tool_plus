@@ -9,7 +9,7 @@ Contact: richardchalger@gmail.com
 First add the package to your pubspec.yaml:
 ```yaml
 dependencies:
-  clean_gen_tool_plus: ^1.0.1
+  clean_gen_tool_plus: ^1.0.2
 ```
 ---
 Or run the following command in your terminal:
@@ -52,7 +52,6 @@ state management, and scalable app development.
 
 It includes:
 
-- A sample Category screen
 - A sample Login screen
 - Implementation of Bloc/Cubit for state management
 - Robust error handling (network errors, failures, exceptions)
@@ -62,14 +61,22 @@ It includes:
 - PrettyDioLogger for the best dio logging for debuggers
 - Offline Builder in case internet went off
 - A ready to use General Layer to help use in the app :
-    * constants / routing / theme / env settings / offline builder / shared preference
-
+    * constants / routing / theme / env settings / offline builder / shared preference / Queue Request / utils 
+    * services like Dio, SharedPreferences, Connectivity, and more 
+    * extensions for common types
+    * routing with auto_route
+    * Dependency Injection using get_it
+  and many many more
+- A ready to use responsive layouts and builders
+  * check rs_seek plugin for examples on how to implement responsive layouts
 The project is built following the Clean Architecture principles, broken down into three main
 layers:
 
-* business_layer – Manages state using Cubits (Bloc)
+* business_layer – Manages state using (Bloc)
 * data_layer – Handles models, networking, and repositories
 * general_layer – Contains constants, services, utilities, routing, and more
+* Dependency Injection – Uses get_it for service locator pattern
+* Features – Organized by feature, each with its own presentation layer
 
 ## Structure
 
@@ -172,6 +179,4 @@ dart lib/generate_structure.dart > structure.txt
 ---
 
 ## Credits
-
-Built with ❤️
-Special thanks to Abdullah Essam for the inspiration and guidance.
+Built with ❤️ by Mohammad Al-Adarbi
