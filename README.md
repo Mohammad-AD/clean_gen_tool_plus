@@ -1,15 +1,15 @@
-Clean Flutter Architecture,
-Clean Gen-ToolPlus
+[![Pub Version](https://img.shields.io/pub/v/clean_gen_tool_plus)](https://pub.dev/packages/clean_gen_tool_plus)
+[![Publisher](https://img.shields.io/pub/publisher/clean_gen_tool_plus)](https://pub.dev/packages/clean_gen_tool_plus/publisher)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-Contact: richardchalger@gmail.com
-
+# Clean Gen Tool Plus
 ---
 # How To Use
 
 First add the package to your pubspec.yaml:
 ```yaml
 dependencies:
-  clean_gen_tool_plus: ^1.0.2
+  clean_gen_tool_plus: ^1.0.4
 ```
 ---
 Or run the following command in your terminal:
@@ -34,7 +34,7 @@ and add the following code to it:
 import 'package:clean_gen_tool_plus/clean_gen_tool_plus.dart';
 
  void main() async {
-   await CleanGenTool.generate();
+   await CleanGenToolPlus.generate();
  }
 ```
 ---
@@ -180,3 +180,4 @@ dart lib/generate_structure.dart > structure.txt
 
 ## Credits
 Built with ❤️ by Mohammad Al-Adarbi
+Contact: richardchalger@gmail.com

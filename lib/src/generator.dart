@@ -7,7 +7,7 @@ import 'logger.dart';
 /// A code generation utility for creating Clean Architecture structure.
 class CleanGenToolPlus {
   /// Project version.
-  static String projectVersion = '1.0.3';
+  static String projectVersion = '1.0.4';
 
   /// Generates the folder structure and files at the given [targetPath].
   static Future<void> generate() async {

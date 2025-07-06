@@ -1,5 +1,3 @@
-import 'dart:developer' as developer;
-
 /// A simple logger that prints messages to the console with color coding.
 enum Logger {
   /// black Color codes for different log levels.
@@ -32,5 +30,5 @@ enum Logger {
   const Logger(this.code);
 
   /// Logs the given [text] with the specified color.
-  void log(dynamic text) => developer.log('\x1B[${code}m$text\x1B[0m');
+  void log(dynamic text) => print('\x1B[${code}m$text\x1B[0m');
 }
