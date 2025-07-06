@@ -7,7 +7,7 @@ import 'logger.dart';
 /// A code generation utility for creating Clean Architecture structure.
 class CleanGenToolPlus {
   /// Project version.
-  static String projectVersion = '1.0.2';
+  static String projectVersion = '1.0.3';
 
   /// Generates the folder structure and files at the given [targetPath].
   static Future<void> generate() async {
@@ -43,6 +43,9 @@ class CleanGenToolPlus {
 
     systemLogWarning('Generating Features files...');
     await _generateFeatures(libDir, projectName); // checked true / status done
+
+    systemLogWarning('Generating Assets files...');
+    await _generateAssetsGn(libDir, projectName); // checked true / status done
 
     systemLogWarning('Generating Core files...');
     await _generateCore(libDir, projectName); // checked true / status done
@@ -492,6 +495,14 @@ Future<void> _generateFeatures(Directory libDir, String projectName) async {
   ).writeAsString(_notificationScreen(projectName)); // done
 }
 
+Future<void> _generateAssetsGn(Directory libDir, String projectName) async {
+  final assetDir = Directory(join(libDir.path, 'generated'));
+  await assetDir.create(recursive: true);
+  await File(
+    join(assetDir.path, 'assets.dart'),
+  ).writeAsString(_assetsFolderCode(projectName)); // done
+}
+
 Future<void> _generateMainApp(Directory libDir, String projectName) async {
   await File(join(libDir.path, 'main.dart'))
       .writeAsString(_mainCode(projectName)); //done
@@ -507,8 +518,10 @@ Future<void> _generateMainApp(Directory libDir, String projectName) async {
   ).writeAsString(_blocObserverCode(projectName)); //done
 }
 
-Future<void> _generatePubspecYaml(Directory projectDir,
-    String projectName,) async {
+Future<void> _generatePubspecYaml(
+  Directory projectDir,
+  String projectName,
+) async {
   final flutterCmd = Platform.isWindows ? 'flutter.bat' : 'flutter';
 
   late final String flutterVersionOutput;
@@ -532,7 +545,7 @@ Future<void> _generatePubspecYaml(Directory projectDir,
     r'Flutter\s(\d+\.\d+\.\d+)',
   ).firstMatch(flutterVersionOutput);
   final flutterVersion =
-  flutterMatch != null ? flutterMatch.group(1)! : 'unknown';
+      flutterMatch != null ? flutterMatch.group(1)! : 'unknown';
 
   final pubspecContent = '''
 name: $projectName
@@ -580,6 +593,7 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  flutter_lints:
 
 flutter:
   uses-material-design: true
@@ -674,7 +688,6 @@ import 'package:$projectName/core/general_layer/utils/app_env_settings.dart';
 
 class EC {
   static final String baseUrl = Environment.apiKey;
-  static final String baseImageUrl = Environment.apiImagesUrl;
 }
 
 ''';
@@ -909,10 +922,7 @@ import 'package:$projectName/core/data_layer/network/dio_consumer.dart';
 import 'package:$projectName/core/data_layer/network/queue_consumer.dart';
 import 'package:$projectName/core/general_layer/constants/app_constants.dart';
 import 'package:$projectName/core/general_layer/methods/general_methods.dart';
-import 'package:$projectName/core/general_layer/services/foreground_location_service.dart';
 import 'package:$projectName/core/general_layer/services/network_service.dart';
-import 'package:$projectName/core/general_layer/services/notification_service.dart';
-import 'package:$projectName/core/general_layer/services/device_storage_service.dart';
 import 'package:$projectName/core/general_layer/utils/app_env_settings.dart';
 import 'package:$projectName/core/general_layer/utils/app_location_service.dart';
 import 'package:$projectName/core/general_layer/utils/app_notification_storage.dart';
@@ -927,7 +937,6 @@ class ServiceLocator {
     final getIt = GetIt.instance;
     getIt.registerLazySingleton<AppPreferences>(() => AppPreferences());
     getIt.registerLazySingleton<GeneralMethods>(() => GeneralMethods());
-    final gmd = getIt<GeneralMethods>();
     getIt.registerLazySingleton<NotificationStore>(() => NotificationStore());
 
     getIt.registerLazySingleton<LocationService>(() => LocationService());
@@ -1384,7 +1393,7 @@ class GeneralWidgets {
     );
   }
 
-  buildPadding({
+ Padding buildPadding({
     required Widget child,
     EdgeInsetsGeometry? padding,
   }) {
@@ -1437,9 +1446,7 @@ class GeneralWidgets {
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: Text(
-        '© ${DateTime
-    .now()
-    .year} DCP Tracker. All rights reserved.',
+        '© ${DateTime.now().year} DCP Tracker. All rights reserved.',
         style: TextStyle(color: Colors.grey, fontSize: 12),
         textAlign: TextAlign.center,
       ),
@@ -1769,10 +1776,37 @@ class AppUtils {
     return RegExp(r'^[^@]+@' + RegExp.escape(domain) + r'\$').hasMatch(email);
   }
 
-  static bool isPhoneNumberValid(String phoneNumber) {
-    return RegExp(r'^\+?[0-9]{10,15}\$').hasMatch(phoneNumber);
+ static bool isPhoneNumberValid(String phoneNumber) {
+    switch (phoneNumber.length) {
+      case 10:
+        return isJordanianPhoneNumberValid(phoneNumber);
+      case 11:
+        return isSaudiPhoneNumberValid(phoneNumber);
+      case 12:
+        return isEmiratiPhoneNumberValid(phoneNumber);
+      case 13:
+        return isEgyptianPhoneNumberValid(phoneNumber);
+      case 14:
+        return isAmericanPhoneNumberValid(phoneNumber);
+      default:
+        return false;
+    }
   }
-
+static bool isJordanianPhoneNumberValid(String phoneNumber) {
+    return RegExp(r'^(079|078|077|076|075|074|073|072|071)[0-9]{7}\$').hasMatch(phoneNumber);
+  }
+  static bool isSaudiPhoneNumberValid(String phoneNumber) {
+    return RegExp(r'^(5|9)[0-9]{8}\$').hasMatch(phoneNumber);
+  }
+  static bool isEmiratiPhoneNumberValid(String phoneNumber) {
+    return RegExp(r'^(5|6|7)[0-9]{8}\$').hasMatch(phoneNumber);
+  }
+  static bool isEgyptianPhoneNumberValid(String phoneNumber) {
+    return RegExp(r'^(1|2|3|4|5|6|7|8|9)[0-9]{9}\$').hasMatch(phoneNumber);
+  }
+  static bool isAmericanPhoneNumberValid(String phoneNumber) {
+    return RegExp(r'^(1|2|3|4|5|6|7|8|9)[0-9]{10}\$').hasMatch(phoneNumber);
+  }
   static bool isUrlValid(String url) {
     return RegExp(
       r'^(https?|ftp):\/\/[^\s/\$.?#].[^\s]*\$',
@@ -2783,14 +2817,14 @@ class GeneralMethods {
 
 
  String formatPosition(Position position) {
- return ''
+ return \'''
  Lat: \${position.latitude}
  Long: \${position.longitude}
  Accuracy: \${position.accuracy}m
  Speed: \${position.speed} m/s
  Bearing: \${position.heading}°
  Timestamp: \${position.timestamp}
- '';
+ \''';
    }
 
   Future<String?> getAndroidId() async {
@@ -2985,6 +3019,8 @@ class _SplashScreenState extends State<SplashScreen> {
         body: Center(
             child:
             Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+              // You are going to need to add the image to your assets
+              // Then generate the assets in a folder named generated
               RsAspectRatio(
                   landscapeRatio: 2.0,
                   portraitRatio: 1.0,
@@ -3005,26 +3041,21 @@ class _SplashScreenState extends State<SplashScreen> {
 
   Future<void> initDiService() async {
     await Future.delayed(Duration(milliseconds: 700));
-    context.pushReplacementNamed(Routes.initializerScreen);
+    if (mounted) context.pushReplacementNamed(Routes.initializerScreen);
   }
 }
 ''';
 
 String _appInitializerCode(String projectName) => '''
-import 'dart:convert';
 
 import 'package:after_layout/after_layout.dart';
 import 'package:$projectName/core/general_layer/constants/app_constants.dart';
 import 'package:$projectName/core/general_layer/extensions/navigation_extensions.dart';
 import 'package:$projectName/core/general_layer/methods/general_methods.dart';
 import 'package:$projectName/core/general_layer/routing/app_routes_list.dart';
-import 'package:$projectName/core/general_layer/services/foreground_location_service.dart';
 import 'package:$projectName/core/general_layer/utils/app_shared_preferences.dart';
-import 'package:$projectName/core/general_layer/widgets/app_general_widgets.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
-import 'package:rs_seek/rs_seek.dart';
 
 class AppInitializer extends StatefulWidget {
   const AppInitializer({super.key});
@@ -3035,10 +3066,8 @@ class AppInitializer extends StatefulWidget {
 
 class _AppInitializerState extends State<AppInitializer>
     with AfterLayoutMixin<AppInitializer> {
-  late final ForegroundLocationService _locationService;
   late final AppPreferences _appPrefs;
   late final GeneralMethods _gmd;
-  late final GeneralWidgets _gw;
 
   @override
   void initState() {
@@ -3056,29 +3085,17 @@ class _AppInitializerState extends State<AppInitializer>
     } else {
      _navigateToNextScreen();
   }
-
-  OutlineInputBorder _buildOutlineInputBorder() {
-    return OutlineInputBorder(
-      borderSide: const BorderSide(color: AC.xMainColor, width: 1.5),
-      borderRadius: BorderRadius.circular(8),
-    );
   }
 
   Future<void> _initializeApp() async {
     _appPrefs = GetIt.instance<AppPreferences>();
-    _locationService = GetIt.instance<ForegroundLocationService>();
     _gmd = GetIt.instance<GeneralMethods>();
-    _gw = GetIt.instance<GeneralWidgets>();
-    // you can uncomment the next lines if you want to use location services and fetch device ID
+    // you can uncomment the next lines if you want to fetch device ID
     // await Future.wait([
-    //   _startLocationService(),
-    //   _getDeviceId(),
+    //   getDeviceId(),
     // ]);
   }
 
-  Future<void> _startLocationService() async {
-    _locationService.start();
-  }
 
   void _navigateToNextScreen() async {
     final userInfo = _appPrefs.getData('user_info');
@@ -3105,9 +3122,9 @@ class _AppInitializerState extends State<AppInitializer>
                     borderRadius: BorderRadius.circular(25)))));
   }
 
-  Future<void> _getDeviceId() async {
+  Future<void> getDeviceId() async {
     final id = await _gmd.getAndroidId();
-    _gmd.systemLogAction('[Device ID] ',id);
+    _gmd.systemLogInfo('[Device ID] \$id');
     AC.deviceId = id ?? 'no device id';
   }
 }
@@ -3353,21 +3370,29 @@ String _genCode(String projectName) => '''
 // }
  ''';
 
+String _assetsFolderCode(String projectName) => '''
+class Assets {
+  Assets._();
+
+  static const String cardealership = '.env';
+  static const String langAr = 'assets/lang/ar.json';
+  static const String langEn = 'assets/lang/en.json';
+  static const String imagesLogo = 'path/to/your/logo.png';
+}
+
+''';
+
 String _mainCode(String projectName) => '''
-import 'package:dio/dio.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:$projectName/core/business_layer/bloc/login/login_bloc.dart';
-import 'package:$projectName/core/business_layer/cubit/category/category_cubit.dart';
 import 'package:$projectName/core/business_layer/cubit/locale/locale_cubit.dart';
 import 'package:$projectName/core/business_layer/cubit/theme/theme_cubit.dart';
-import 'package:$projectName/core/data_layer/network/dio_consumer.dart';
-import 'package:$projectName/core/general_layer/routing/app_router.dart';
-import 'package:$projectName/core/general_layer/utils/app_env_settings.dart';
-import 'package:$projectName/core/general_layer/utils/app_shared_preferences.dart';.
 import 'package:$projectName/core/general_layer/widgets/app_error_widget.dart';
 import 'package:$projectName/core/di_layer/di_service_layer.dart';
 import 'package:$projectName/core/general_layer/constants/app_constants.dart';
-import 'package:get_it/get_it.dart';
+import 'package:$projectName/core/data_layer/di_service_layer.dart';
+import 'package:$projectName/core/general_layer/routing/app_router_settings.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -3401,7 +3426,7 @@ String _appCode(String projectName) => '''
 import 'package:easy_localization/easy_localization.dart';
 import 'package:$projectName/core/business_layer/cubit/theme/theme_cubit.dart';
 import 'package:$projectName/core/general_layer/constants/app_constants.dart';
-import 'package:$projectName/core/general_layer/routing/app_router.dart';
+import 'package:$projectName/core/general_layer/routing/app_router_settings.dart';
 import 'package:$projectName/core/general_layer/utils/app_offline_builder.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -3607,7 +3632,7 @@ class _NotificationInboxScreenState extends State<NotificationInboxScreen> {
                               ),
                               const SizedBox(width: 4),
                               Text(
-                                'Route: '+screen,
+                                'Route: \$screen',
                                 style:
                                     TextStyle(color: AC.xWhite, fontSize: 13),
                               ),
@@ -3647,7 +3672,7 @@ class _NotificationInboxScreenState extends State<NotificationInboxScreen> {
 String _loginScreenCode(String projectName) => '''
 import 'package:$projectName/core/business_layer/bloc/login/login_bloc.dart';
 import 'package:$projectName/core/general_layer/extensions/navigation_extensions.dart';
-import 'package:$projectName/core/general_layer/routing/routes.dart';
+import 'package:$projectName/core/general_layer/routing/app_routes_list.dart';
 import 'package:$projectName/core/general_layer/utils/app_validation_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -3667,9 +3692,8 @@ class LoginScreen extends StatelessWidget {
           if (state is LoginError) {
             _showDialog(ctx, 'Error', state.errorMsg);
           } else if (state is LoginSuccessful) {
-            _showDialog(ctx, 'Success', state.msg).then(
-              (value) => ctx.pushReplacementNamed(Routes.notificationInboxScreen),
-            );
+           ctx.pushReplacementNamed(Routes.notificationInboxScreen);
+            _showDialog(ctx, 'Success', state.msg);
           }
         },
         child: SafeArea(
