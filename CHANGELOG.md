@@ -16,3 +16,6 @@
 - Added the best logging for dio requests PrettyDioLogger.
 - Added custom loggers for printing logs in the console with color template.
 - Bug fixes and improvements.
+
+## 1.0.5
+- Bug fixes and improvements.

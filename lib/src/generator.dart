@@ -7,7 +7,7 @@ import 'logger.dart';
 /// A code generation utility for creating Clean Architecture structure.
 class CleanGenToolPlus {
   /// Project version.
-  static String projectVersion = '1.0.4';
+  static String projectVersion = '1.0.5';
 
   /// Generates the folder structure and files at the given [targetPath].
   static Future<void> generate() async {
@@ -18,47 +18,55 @@ class CleanGenToolPlus {
       systemLogInfo('Creating lib directory...');
       await libDir.create(recursive: true);
     }
-    systemLogInfo(
-        'Generating Clean Architecture structure for $projectName...');
-    systemLogWarning('Generating Readme');
-    await _generateReadme(
-        projectDir, projectName); // checked true / status done
+    systemLogAction(
+        'Clean Architecture structure for $projectName...', 'GENERATING');
+    systemLogWarningCyan('Generating Readme');
+    await _generateReadme(projectDir, projectName);
 
-    systemLogWarning('Generating .env file...');
-    await _generateDotEnv(
-        projectDir, projectName); // checked true / status done
+    systemLogWarningCyan('Generating .env file...');
+    await _generateDotEnv(projectDir, projectName);
 
-    systemLogWarning('Generating assets folders...');
-    await _generateAssetsFolders(projectDir); // checked true / status done
+    systemLogWarningCyan('Generating assets folders...');
+    await _generateAssetsFolders(projectDir);
 
-    systemLogWarning('Generating pubspec.yaml...');
-    await _generatePubspecYaml(
-        projectDir, projectName); // checked true / status done
+    systemLogWarningCyan('Generating pubspec.yaml...');
+    await _generatePubspecYaml(projectDir, projectName);
 
     systemLogWarning('Generating Localization files...');
-    await _generateLocalizationFiles(projectDir); // checked true / status done
+    await _generateLocalizationFiles(projectDir);
 
     systemLogWarning('Generating Main files...');
-    await _generateMainApp(libDir, projectName); // checked true / status done
+    await _generateMainApp(libDir, projectName);
 
     systemLogWarning('Generating Features files...');
-    await _generateFeatures(libDir, projectName); // checked true / status done
+    await _generateFeatures(libDir, projectName);
 
-    systemLogWarning('Generating Assets files...');
-    await _generateAssetsGn(libDir, projectName); // checked true / status done
+    systemLogWarningCyan('Generating Assets files...');
+    await _generateAssetsGn(libDir, projectName);
 
     systemLogWarning('Generating Core files...');
-    await _generateCore(libDir, projectName); // checked true / status done
+    await _generateCore(libDir, projectName);
 
     systemLogAction(
-        '\nFlutter project is fully ready with Clean Architecture by Mohammad AD - GenTool',
-        'SUCCESS');
+        'Flutter project is fully ready with Clean Architecture by Mohammad AD - GenTool',
+        'FINISHED GENERATING');
+    systemLogInfo(
+        '📗─────────────────────────────────HAPPY CODING────────────────────────────────────📗');
+    systemLogWarning('Thank you for using my package📙');
+    systemLogWarning(
+        'Check other packages at https://pub.dev/publishers/bummycakes.com/packages📙');
+    systemLogWarningCyan('📔You can contact me at richardchalger@gmail.com📔');
   }
 }
 
 /// Logging utility warning functions
 void systemLogWarning(String message) {
   Logger.yellow.log('📙 [CleanGENTOOLPlus] [Warning] $message');
+}
+
+/// Logging utility warning info functions
+void systemLogWarningCyan(String message) {
+  Logger.cyan.log('📙 [CleanGENTOOLPlus] [Warning] $message');
 }
 
 /// Logging utility info functions
@@ -68,12 +76,12 @@ void systemLogInfo(String message) {
 
 /// Logging utility Error functions
 void systemLogError(String context, Object e) {
-  Logger.red.log('📕 [CleanGENTOOLPlus] [ERROR] [$context]: $e');
+  Logger.red.log('📕 [CleanGENTOOLPlus] [ERROR] 📕$context📕: $e');
 }
 
 /// Logging utility action functions
 void systemLogAction(String context, Object e) {
-  Logger.blue.log('📘 [CleanGENTOOLPlus] [Action] [$context]: $e');
+  Logger.blue.log('📘 [CleanGENTOOLPlus] [Action] 📘$context📘: $e');
 }
 
 Future<void> _generateDotEnv(Directory projectDir, String projectName) async {
@@ -504,14 +512,17 @@ Future<void> _generateAssetsGn(Directory libDir, String projectName) async {
 }
 
 Future<void> _generateMainApp(Directory libDir, String projectName) async {
-  await File(join(libDir.path, 'main.dart'))
-      .writeAsString(_mainCode(projectName)); //done
+  await File(
+    join(libDir.path, 'main.dart'),
+  ).writeAsString(_mainCode(projectName)); //done
 
-  await File(join(libDir.path, 'gen_tool.dart'))
-      .writeAsString(_genCode(projectName)); //done
+  await File(
+    join(libDir.path, 'gen_tool.dart'),
+  ).writeAsString(_genCode(projectName)); //done
 
-  await File(join(libDir.path, 'app.dart'))
-      .writeAsString(_appCode(projectName)); //done
+  await File(
+    join(libDir.path, 'app.dart'),
+  ).writeAsString(_appCode(projectName)); //done
 
   await File(
     join(libDir.path, 'app_bloc_observer.dart'),
@@ -609,8 +620,9 @@ flutter:
   await file.writeAsString(pubspecContent);
 
   systemLogAction(
-      'Pubspec.yaml generated successfully with Flutter version $flutterVersion',
-      'SUCCESS');
+    'Pubspec.yaml generated successfully with Flutter version $flutterVersion',
+    'SUCCESS',
+  );
 }
 
 // ============================ الأكواد ============================
@@ -627,7 +639,7 @@ class AC {
   // 📓: canceled status message
   // 📔: Or anything you like and want to recognize immediately by color
 
-  static const String appName = 'MDM Tracker';
+  static const String appName = '$projectName';
   static const List<Locale> supportedLocales = [Locale('en'), Locale('ar')];
   static const String localeKey = 'app_locale';
   static const String themeKey = 'app_theme';
@@ -1152,7 +1164,7 @@ class GeneralWidgets {
       children: [
         RsAspectRatio(child: Image.asset(Assets.imagesLogo)),
         const Text(
-          'DCP Tracker',
+          '$projectName',
           style: TextStyle(
               fontSize: 28, fontWeight: FontWeight.bold, color: AC.xMainColor),
         ),
@@ -1446,7 +1458,7 @@ class GeneralWidgets {
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: Text(
-        '© ${DateTime.now().year} DCP Tracker. All rights reserved.',
+        '© ${DateTime.now().year} $projectName. All rights reserved.',
         style: TextStyle(color: Colors.grey, fontSize: 12),
         textAlign: TextAlign.center,
       ),
@@ -2800,19 +2812,19 @@ class GeneralMethods {
   }
 
   void systemLogWarning(String message) {
-    Logger.yellow.log('📙 [MDM] [Warning] \$message');
+    Logger.yellow.log('📙 [$projectName] [Warning] \$message');
   }
 
   void systemLogInfo(String message) {
-    Logger.green.log('📗 [MDM] [INFO] \$message');
+    Logger.green.log('📗 [$projectName] [INFO] \$message');
   }
 
   void systemLogError(String context, Object e) {
-    Logger.red.log('📕 [MDM] [ERROR] [\$context]: \$e');
+    Logger.red.log('📕 [$projectName] [ERROR] [\$context]: \$e');
   }
 
   void systemLogAction(String context, Object e) {
-    Logger.blue.log('📘 [MDM] [Action] [\$context]: \$e');
+    Logger.blue.log('📘 [$projectName] [Action] [\$context]: \$e');
   }
 
 
@@ -3388,7 +3400,6 @@ import 'package:$projectName/core/business_layer/bloc/login/login_bloc.dart';
 import 'package:$projectName/core/business_layer/cubit/locale/locale_cubit.dart';
 import 'package:$projectName/core/business_layer/cubit/theme/theme_cubit.dart';
 import 'package:$projectName/core/general_layer/widgets/app_error_widget.dart';
-import 'package:$projectName/core/di_layer/di_service_layer.dart';
 import 'package:$projectName/core/general_layer/constants/app_constants.dart';
 import 'package:$projectName/core/data_layer/di_service_layer.dart';
 import 'package:$projectName/core/general_layer/routing/app_router_settings.dart';
